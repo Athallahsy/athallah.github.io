@@ -31,7 +31,7 @@ const IconLinkedin = () => (
   </svg>
 );
 
-const ROTATING_WORDS = ["grow", "build", "ship", "create", "launch"];
+const ROTATING_WORDS = ["build", "ship", "grow", "create", "launch"];
 
 // Kata terpanjang di ROTATING_WORDS dipakai buat nentuin lebar minimum
 // slot rotasi, biar kata sepanjang apapun ("launch" vs "ship") gak bikin
@@ -129,10 +129,8 @@ const CONTACT_COLUMNS = [
   },
   {
     label: "WhatsApp",
-    // TODO: nomor di bawah ini masih placeholder/contoh — ganti ke nomor
-    // WhatsApp asli sebelum deploy ke production.
     value: "Chat on WhatsApp",
-    href: "https://wa.me/6281234567890",
+    href: "https://wa.me/6283192511946",
     target: "_blank",
   },
 ];
@@ -249,20 +247,20 @@ export default function FooterContact() {
               margin: 0,
             }}
           >
-            {/* Line 1: "Lets {rotating word}" */}
+            {/* Line 1: "Let's {rotating word}" */}
             <span
               className="inline-flex items-center gap-2"
               style={{ color: "#ffffff" }}
             >
-              <span>Lets</span>
+              <span>Let&apos;s</span>
               <RotatingWord reduceMotion={reduceMotion} />
             </span>
-            {/* Line 2: "businesses together." */}
+            {/* Line 2: "great products together." */}
             <span
               className="block"
               style={{ color: "rgba(255,255,255,0.38)", fontStyle: "normal" }}
             >
-              businesses together.
+              great products together.
             </span>
           </h2>
         </div>
@@ -397,21 +395,18 @@ export default function FooterContact() {
                 fontFamily: "var(--font-jakarta)",
               }}
             >
-              Legal
+              Location
             </div>
-            <a
-              href="#"
-              className="inline-block rounded-sm outline-none transition-opacity duration-200 hover:opacity-50 focus-visible:opacity-50 focus-visible:ring-1 focus-visible:ring-white/40"
+            <span
               style={{
                 fontSize: 13,
-                fontWeight: 600,
+                fontWeight: 500,
                 color: "#ffffff",
-                textDecoration: "none",
                 fontFamily: "var(--font-jakarta)",
               }}
             >
-              Terms of service
-            </a>
+              Bogor, Indonesia (GMT+7)
+            </span>
           </div>
 
           <div

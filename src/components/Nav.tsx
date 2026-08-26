@@ -424,9 +424,9 @@ export default function Nav() {
           position: "fixed",
           inset: 0,
           zIndex: 999,
-          background: "rgba(255, 255, 255, 0.97)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          background: "rgba(8, 8, 8, 0.96)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -454,10 +454,14 @@ export default function Nav() {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 textDecoration: "none",
-                color: isContact ? "var(--primary)" : "#0A0A0A",
-                opacity: isActive || isContact ? 1 : 0.75,
+                color: isContact
+                  ? "var(--primary)"
+                  : isActive
+                    ? "#FFFFFF"
+                    : "rgba(255, 255, 255, 0.7)",
                 paddingBottom: "2px",
                 cursor: "pointer",
+                transition: "color 0.2s ease, opacity 0.2s ease",
               }}
             >
               {label}

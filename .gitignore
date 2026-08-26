@@ -44,4 +44,6 @@ next-env.d.ts
 .claude/
 .gemini/
 .impeccable/
+.agents/
+skills-lock.json
 
