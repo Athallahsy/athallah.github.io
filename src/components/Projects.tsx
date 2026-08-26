@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MotionPathPlugin } from "gsap/MotionPathPlugin";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 type Aspect = "landscape" | "portrait";
 
@@ -127,8 +125,8 @@ function Chip({
     "inline-flex items-center whitespace-nowrap rounded-full text-[11px] font-semibold";
   const toneClass =
     tone === "accent"
-      ? "px-3 py-1 border border-[#7DD3FC] text-[#0088CC] uppercase tracking-[0.06em]"
-      : "tag-chip px-2.5 py-1 border border-[#E2E2E2] bg-white text-[#3A3A3A]";
+      ? "px-3 py-1 border border-primary text-primary uppercase tracking-[0.06em]"
+      : "tag-chip px-2.5 py-1 border border-[#27272A] bg-[#1A1A1A] text-[#94A3B8]";
   return (
     <span
       className={`${base} ${toneClass}`}
@@ -146,9 +144,10 @@ export default function Projects() {
   const airplaneRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const watermarkRef = useRef<HTMLSpanElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
     const mm = gsap.matchMedia();
 
     // Header eyebrow & title animations
@@ -204,7 +203,7 @@ export default function Projects() {
         const opacity = 1 - life;
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(51, 51, 51, ${opacity * 0.7})`;
+        ctx.fillStyle = `rgba(3, 105, 161, ${opacity * 0.85})`;
         ctx.fill();
       });
     };
@@ -295,6 +294,14 @@ export default function Projects() {
           scrub: 1,
           pin: true,
           invalidateOnRefresh: true,
+          onToggle: (self) => {
+            setIsScrolling(self.isActive);
+          },
+          onUpdate: (self) => {
+            if (progressBarRef.current) {
+              progressBarRef.current.style.width = `${self.progress * 100}%`;
+            }
+          },
         },
       });
 
@@ -473,7 +480,7 @@ export default function Projects() {
       style={{
         position: "relative",
         zIndex: 20,
-        background: "#FAFAFA",
+        background: "#080808",
         overflow: "hidden",
       }}
       className="lg:h-screen lg:w-full"
@@ -489,41 +496,82 @@ export default function Projects() {
           fontSize: "clamp(120px, 20vw, 320px)",
           fontWeight: 900,
           letterSpacing: "-0.04em",
-          color: "#000000",
-          opacity: 0.05,
+          color: "#FFFFFF",
+          opacity: 0.03,
           lineHeight: 1,
           userSelect: "none",
           pointerEvents: "none",
           fontFamily: "var(--font-anton)",
           zIndex: 0,
+          transform: "translateZ(0)",
+          willChange: "transform",
         }}
       >
         WORK
       </span>
 
+      {/* ── Horizontal Scroll Progress Indicator (desktop only) ──────────── */}
+      {/* Visible only while the section is pinned / active */}
+      <div
+        aria-hidden
+        className="hidden lg:flex"
+        style={{
+          position: "absolute",
+          bottom: 28,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 50,
+          opacity: isScrolling ? 1 : 0.35,
+          transition: "opacity 0.4s ease",
+          pointerEvents: "none",
+        }}
+      >
+        {/* Track bar */}
+        <div
+          style={{
+            width: 140,
+            height: 3,
+            background: "rgba(255,255,255,0.1)",
+            borderRadius: 9999,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            ref={progressBarRef}
+            style={{
+              height: "100%",
+              width: "0%",
+              background: "var(--primary)",
+              borderRadius: 9999,
+              transition: "width 0.05s linear",
+            }}
+          />
+        </div>
+      </div>
+
       {/* Track wrapper for Desktop horizontal scroll & Mobile vertical layout */}
       <div
         ref={trackRef}
         className="w-full lg:h-full lg:flex lg:items-center lg:px-20 lg:gap-16 lg:w-max py-28 lg:py-0 px-6 max-w-[1200px] lg:max-w-none mx-auto lg:mx-0 relative z-10"
-        style={{ willChange: "transform" }}
+        style={{ transform: "translateZ(0)", willChange: "transform" }}
       >
         {/* Cloud parallax layer (z-5) */}
         <div
           ref={cloudsRef}
           className="hidden lg:block pointer-events-none absolute top-0 left-0 h-full z-5 overflow-hidden"
-          style={{ willChange: "transform" }}
+          style={{ transform: "translateZ(0)", willChange: "transform" }}
         >
-          <CloudVariantA className="absolute top-[12%] left-[4%] w-[180px] h-[60px] opacity-30 text-[#7DD3FC]" />
-          <CloudVariantB className="absolute top-[68%] left-[13%] w-[240px] h-[75px] opacity-25 text-[#38BDF8]" />
-          <CloudVariantA className="absolute top-[18%] left-[22%] w-[200px] h-[65px] opacity-35 text-[#7DD3FC]" />
-          <CloudVariantB className="absolute top-[72%] left-[31%] w-[220px] h-[70px] opacity-20 text-[#38BDF8]" />
-          <CloudVariantA className="absolute top-[14%] left-[40%] w-[190px] h-[60px] opacity-30 text-[#7DD3FC]" />
-          <CloudVariantB className="absolute top-[65%] left-[49%] w-[250px] h-[80px] opacity-25 text-[#38BDF8]" />
-          <CloudVariantA className="absolute top-[20%] left-[58%] w-[210px] h-[68px] opacity-35 text-[#7DD3FC]" />
-          <CloudVariantB className="absolute top-[70%] left-[67%] w-[230px] h-[72px] opacity-20 text-[#38BDF8]" />
-          <CloudVariantA className="absolute top-[15%] left-[76%] w-[185px] h-[62px] opacity-30 text-[#7DD3FC]" />
-          <CloudVariantB className="absolute top-[66%] left-[85%] w-[245px] h-[78px] opacity-25 text-[#38BDF8]" />
-          <CloudVariantA className="absolute top-[18%] left-[94%] w-[205px] h-[66px] opacity-35 text-[#7DD3FC]" />
+          <CloudVariantA className="absolute top-[12%] left-[4%] w-[180px] h-[60px] opacity-30 text-primary-300" />
+          <CloudVariantB className="absolute top-[68%] left-[13%] w-[240px] h-[75px] opacity-25 text-primary-400" />
+          <CloudVariantA className="absolute top-[18%] left-[22%] w-[200px] h-[65px] opacity-35 text-primary-300" />
+          <CloudVariantB className="absolute top-[72%] left-[31%] w-[220px] h-[70px] opacity-20 text-primary-400" />
+          <CloudVariantA className="absolute top-[14%] left-[40%] w-[190px] h-[60px] opacity-30 text-primary-300" />
+          <CloudVariantB className="absolute top-[65%] left-[49%] w-[250px] h-[80px] opacity-25 text-primary-400" />
+          <CloudVariantA className="absolute top-[20%] left-[58%] w-[210px] h-[68px] opacity-35 text-primary-300" />
+          <CloudVariantB className="absolute top-[70%] left-[67%] w-[230px] h-[72px] opacity-20 text-primary-400" />
+          <CloudVariantA className="absolute top-[15%] left-[76%] w-[185px] h-[62px] opacity-30 text-primary-300" />
+          <CloudVariantB className="absolute top-[66%] left-[85%] w-[245px] h-[78px] opacity-25 text-primary-400" />
+          <CloudVariantA className="absolute top-[18%] left-[94%] w-[205px] h-[66px] opacity-35 text-primary-300" />
         </div>
 
         {/* Trail canvas overlay (z-10: behind cards at z-20) */}
@@ -552,13 +600,13 @@ export default function Projects() {
           <div className="sec-eyebrow flex items-center gap-4 mb-5 overflow-hidden">
             <span
               className="sec-eyebrow-text"
-              style={{ color: "#0088CC", fontWeight: 600 }}
+              style={{ color: "var(--primary)", fontWeight: 600 }}
             >
               {"// SELECTED WORK"}
             </span>
             <div
               className="sec-eyebrow-dash"
-              style={{ background: "#7DD3FC", width: 40 }}
+              style={{ background: "var(--primary)", width: 40 }}
             />
           </div>
 
@@ -567,7 +615,7 @@ export default function Projects() {
               <span
                 className="clip-inner inline-block"
                 style={{
-                  color: "#0A0A0A",
+                  color: "#FFFFFF",
                   fontFamily: "var(--font-anton)",
                   fontWeight: 400,
                   textTransform: "uppercase",
@@ -581,7 +629,7 @@ export default function Projects() {
               <span
                 className="clip-inner inline-block"
                 style={{
-                  color: "#555555",
+                  color: "#94A3B8",
                   fontFamily: "var(--font-anton)",
                   fontWeight: 400,
                   textTransform: "uppercase",
@@ -596,7 +644,7 @@ export default function Projects() {
 
         {/* Projects cards list (z-20) */}
         <div className="flex flex-col gap-24 lg:flex-row lg:gap-20 lg:items-center relative z-20">
-          {FEATURED_PROJECTS.map((proj) => {
+          {FEATURED_PROJECTS.map((proj, index) => {
             const isPortrait = proj.aspect === "portrait";
             return (
               <div
@@ -614,7 +662,7 @@ export default function Projects() {
                     <div className="relative mb-1 inline-block">
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute -left-1 -top-4 select-none text-4xl font-black leading-none text-black/[0.07] md:text-5xl"
+                        className="pointer-events-none absolute -left-1 -top-4 select-none text-4xl font-black leading-none text-white/[0.05] md:text-5xl"
                       >
                         {proj.num}
                       </span>
@@ -625,10 +673,12 @@ export default function Projects() {
 
                     {/* Title */}
                     <h3
-                      className="mb-4 font-extrabold leading-tight"
+                      className="mb-4 leading-tight"
                       style={{
                         fontSize: "clamp(24px, 2.5vw, 32px)",
-                        color: "#0A0A0A",
+                        fontFamily: "var(--font-space-grotesk)",
+                        fontWeight: 700,
+                        color: "#FFFFFF",
                       }}
                     >
                       {proj.title}
@@ -637,7 +687,7 @@ export default function Projects() {
                     {/* Description */}
                     <p
                       className="mb-6 whitespace-pre-line text-sm leading-[1.7]"
-                      style={{ color: "#4A4A4A" }}
+                      style={{ color: "#94A3B8" }}
                     >
                       {proj.desc}
                     </p>
@@ -657,7 +707,7 @@ export default function Projects() {
                         href={proj.liveLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-semibold text-[#333333] transition-colors hover:text-[#0088CC]"
+                        className="text-sm font-semibold text-[#94A3B8] transition-colors hover:text-primary-hover"
                       >
                         Visit website ↗
                       </a>
@@ -667,7 +717,7 @@ export default function Projects() {
                         href={proj.githubLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-semibold text-[#333333] transition-colors hover:text-[#0088CC]"
+                        className="text-sm font-semibold text-[#94A3B8] transition-colors hover:text-primary-hover"
                       >
                         GitHub repository ↗
                       </a>
@@ -684,15 +734,15 @@ export default function Projects() {
                       isPortrait
                         ? "max-w-[260px] aspect-[3/4]"
                         : "max-w-[480px] aspect-[4/3]"
-                    } rounded-2xl border border-black/10 bg-white p-3 shadow-[0_10px_30px_rgba(10,10,10,0.08)] transition-transform duration-500 ease-out ${proj.rotation} hover:rotate-0 hover:shadow-[0_16px_40px_rgba(10,10,10,0.12)]`}
+                    } rounded-2xl border border-white/10 bg-[#1A1A1A] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-500 ease-out ${proj.rotation} hover:rotate-0 hover:shadow-[0_16px_40px_rgba(3,105,161,0.12)]`}
                   >
-                    <div className="relative h-full w-full overflow-hidden rounded-xl bg-[#F3F3F3]">
+                    <div className="relative h-full w-full overflow-hidden rounded-xl bg-[#111111]">
                       <Image
                         src={proj.screenshot}
                         alt={proj.title}
                         fill
                         sizes="(max-width: 1024px) 100vw, 480px"
-                        onLoad={() => ScrollTrigger.refresh()}
+                        priority={index === 0}
                         className="card-image-parallax object-contain"
                         style={{ willChange: "transform" }}
                       />
@@ -706,12 +756,12 @@ export default function Projects() {
 
         {/* Archive section (z-20) */}
         <div
-          className="mt-20 lg:mt-0 pt-12 lg:pt-0 lg:pl-12 lg:border-l lg:border-[#E0E0E0] border-t border-[#E0E0E0] lg:border-t-0 lg:flex-shrink-0 lg:w-[420px] relative z-20"
+          className="mt-20 lg:mt-0 pt-12 lg:pt-0 lg:pl-12 lg:border-l lg:border-[#27272A] border-t border-[#27272A] lg:border-t-0 lg:flex-shrink-0 lg:w-[420px] relative z-20"
           style={{ fontFamily: "var(--font-jakarta)" }}
         >
           <span
             className="mb-5 block text-[11px] font-bold uppercase tracking-[0.2em]"
-            style={{ color: "#888888" }}
+            style={{ color: "#94A3B8" }}
           >
             {"// Also built"}
           </span>
@@ -723,28 +773,28 @@ export default function Projects() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-start gap-4 border-b border-[#F0F0F0] py-4 first:pt-0 last:border-b-0"
+                className="group flex items-start gap-4 border-b border-[#27272A] py-4 first:pt-0 last:border-b-0"
               >
                 {/* Monogram thumbnail — echoes the photo column on the
                     featured cards above so this list reads as part of the
                     same system, not a plain leftover text block. */}
                 <span
                   aria-hidden
-                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border border-[#E2E2E2] bg-white text-lg font-extrabold text-[#0088CC] transition-colors group-hover:border-[#7DD3FC]"
+                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border border-[#27272A] bg-[#1A1A1A] text-lg font-extrabold text-primary transition-colors group-hover:border-primary"
                 >
                   {item.title.charAt(0)}
                 </span>
                 <span className="flex flex-1 flex-col gap-1.5 pt-0.5">
-                  <span className="flex items-center justify-between text-lg font-bold text-[#0A0A0A]">
+                  <span className="flex items-center justify-between text-lg font-bold text-[#FFFFFF]">
                     {item.title}
-                    <span className="text-sm font-semibold text-[#B0B0B0] transition-colors group-hover:text-[#0088CC]">
+                    <span className="text-sm font-semibold text-[#94A3B8] transition-colors group-hover:text-primary-hover">
                       ↗
                     </span>
                   </span>
-                  <span className="text-sm leading-relaxed text-[#666666]">
+                  <span className="text-sm leading-relaxed text-[#94A3B8]">
                     {item.desc}
                   </span>
-                  <span className="text-xs font-medium text-[#999999] transition-colors group-hover:text-[#0088CC]">
+                  <span className="text-xs font-medium text-[#94A3B8] transition-colors group-hover:text-primary-hover">
                     {item.label}
                   </span>
                 </span>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 const STACK = [
   "React",
@@ -30,8 +29,6 @@ export default function TechStackStrip() {
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const track = trackRef.current;
     if (!track) return;
 

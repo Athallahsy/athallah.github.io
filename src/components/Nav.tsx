@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP);
+import type React from "react";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 type NavState = "hero" | "hidden" | "visible";
 
@@ -15,8 +13,6 @@ const LINKS = [
   { label: "Contact", id: "contact" },
 ];
 
-// Pure helpers — no dependency on component state/props, so they live at
-// module scope instead of being re-created inside the effect on every mount.
 const parseRgba = (str: string) => {
   const match = str.match(
     /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/,
@@ -53,21 +49,16 @@ const sampleAt = (x: number, y: number): number | null => {
 
 export default function Nav() {
   const [navState, setNavState] = useState<NavState>("hero");
-  const [isMobileMenuOpen, setMobileMenu] = useState(false);
-  const [hoveredId, setHoveredId] = useState<string>("");
-  const [activeId, setActiveId] = useState<string>("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredId, setHoveredId] = useState("");
+  const [activeId, setActiveId] = useState("");
   const [lightness, setLightness] = useState(0);
 
-  const pillRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement | null>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
-  const indicatorRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement | null>(null);
   const smoothedLightness = useRef(0);
 
-  /* ── Scroll behavior + background color sampling ──
-     Combined into a single listener, throttled to one pass per animation
-     frame (instead of running full work synchronously on every scroll
-     event) to avoid layout-thrashing from elementFromPoint/getComputedStyle
-     during fast scrolling. */
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
@@ -100,14 +91,13 @@ export default function Nav() {
       if (y < 80) setNavState("hero");
       else if (y > lastY) setNavState("hidden");
       else setNavState("visible");
+
       lastY = y;
 
-      // The pill is transparent near the top anyway (isHero styling), so
-      // there's nothing to sample a color for until it's actually visible.
       if (y >= 80) {
         scrollCount++;
         if (scrollCount % SAMPLE_EVERY === 0) {
-          const sampleX = window.innerWidth - 120;
+          const sampleX = Math.max(window.innerWidth - 120, 0);
           const sampleY = 40;
           const result = sampleAt(sampleX, sampleY);
           if (result !== null) {
@@ -128,25 +118,20 @@ export default function Nav() {
 
     processScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (smoothRafId !== null) cancelAnimationFrame(smoothRafId);
     };
   }, []);
 
-  /* ── Close mobile menu when hidden ── */
   useEffect(() => {
     if (navState === "hidden") {
-      const id = setTimeout(() => setMobileMenu(false), 0);
+      const id = setTimeout(() => setIsMobileMenuOpen(false), 0);
       return () => clearTimeout(id);
     }
   }, [navState]);
 
-  /* ── Scroll-spy: highlight whichever section is currently centered in the
-     viewport, so the indicator reflects where you actually are while
-     scrolling — not just on hover. The -45%/-45% margin means a section
-     only counts as "active" once it's crossing the vertical middle of the
-     screen, rather than the moment it merely enters the viewport. */
   useEffect(() => {
     const sections = LINKS.map(({ id }) => document.getElementById(id)).filter(
       (el): el is HTMLElement => el !== null,
@@ -157,13 +142,14 @@ export default function Nav() {
       (entries) => {
         const visible = entries.filter((entry) => entry.isIntersecting);
         if (visible.length === 0) return;
-        // If more than one qualifies, prefer the one closest to true center.
+
         const best = visible.reduce((a, b) =>
           Math.abs(a.boundingClientRect.top) <
           Math.abs(b.boundingClientRect.top)
             ? a
             : b,
         );
+
         setActiveId(best.target.id);
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
@@ -173,17 +159,17 @@ export default function Nav() {
     return () => observer.disconnect();
   }, []);
 
-  /* ── Mobile menu: Escape to close + lock background scroll while open ── */
   useEffect(() => {
     if (!isMobileMenuOpen) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileMenu(false);
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
     };
-    window.addEventListener("keydown", onKeyDown);
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
@@ -191,8 +177,6 @@ export default function Nav() {
     };
   }, [isMobileMenuOpen]);
 
-  /* ── Sliding indicator animation — follows hover, falls back to
-     whichever section scroll-spy says is currently active ── */
   const indicatorTargetId = hoveredId || activeId;
 
   useGSAP(
@@ -208,12 +192,10 @@ export default function Nav() {
 
       const pillRect = pillEl.getBoundingClientRect();
       const linkRect = targetEl.getBoundingClientRect();
-      const x = linkRect.left - pillRect.left;
-      const width = linkRect.width;
 
       gsap.to(indicatorEl, {
-        x,
-        width,
+        x: linkRect.left - pillRect.left,
+        width: linkRect.width,
         opacity: 1,
         duration: 0.35,
         ease: "power3.out",
@@ -222,10 +204,9 @@ export default function Nav() {
     { dependencies: [indicatorTargetId], scope: pillRef },
   );
 
-  /* ── Smooth scroll ── */
-  const handleClick = (e: React.MouseEvent, id: string) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
-    setMobileMenu(false);
+    setIsMobileMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -237,17 +218,14 @@ export default function Nav() {
     c1: [number, number, number],
     c2: [number, number, number],
     t: number,
-  ): string =>
+  ) =>
     `rgb(${Math.round(mix(c1[0], c2[0], t))}, ${Math.round(mix(c1[1], c2[1], t))}, ${Math.round(mix(c1[2], c2[2], t))})`;
 
   const t = lightness;
 
   const navColors = {
     text: mixRgb([255, 255, 255], [10, 10, 10], t),
-    // Glass: sangat transparan, blur kuat — warna tint tipis ikut lightness
-    // section gelap → tint putih tipis, section terang → tint hitam tipis
     pillBg: `rgba(${Math.round(mix(255, 10, t))}, ${Math.round(mix(255, 10, t))}, ${Math.round(mix(255, 10, t))}, ${mix(0.12, 0.55, t)})`,
-    // Border: highlight putih tipis di atas (kesan kaca), hitam tipis kalau section terang
     pillBorder: `1px solid rgba(${Math.round(mix(255, 0, t))}, ${Math.round(mix(255, 0, t))}, ${Math.round(mix(255, 0, t))}, ${mix(0.2, 0.06, t)})`,
     pillShadow: `0 4px 32px rgba(0, 0, 0, ${mix(0.08, 0.18, t)}), inset 0 1px 0 rgba(255,255,255,${mix(0.18, 0.03, t)})`,
     pillContentText: mixRgb([10, 10, 10], [255, 255, 255], t),
@@ -261,7 +239,6 @@ export default function Nav() {
 
   return (
     <>
-      {/* ── LOGO ── */}
       <a
         href="#hero"
         onClick={(e) => handleClick(e, "hero")}
@@ -281,10 +258,9 @@ export default function Nav() {
         <span style={{ color: isHero ? "#FFFFFF" : navColors.text }}>
           Athallah
         </span>
-        <span style={{ color: "#7DD3FC" }}>sy</span>
+        <span style={{ color: "var(--primary)" }}>sy</span>
       </a>
 
-      {/* ── DESKTOP NAV PILL ── */}
       <nav
         ref={pillRef}
         className="hidden md:flex"
@@ -306,7 +282,6 @@ export default function Nav() {
           ...sharedTransition,
         }}
       >
-        {/* Indicator — hitam solid */}
         <div
           ref={indicatorRef}
           style={{
@@ -325,6 +300,7 @@ export default function Nav() {
         {LINKS.map(({ label, id }) => {
           const isHighlighted = indicatorTargetId === id;
           const isContact = id === "contact";
+
           return (
             <a
               key={id}
@@ -335,8 +311,6 @@ export default function Nav() {
               onClick={(e) => handleClick(e, id)}
               onMouseEnter={() => setHoveredId(id)}
               onMouseLeave={() => setHoveredId("")}
-              className="nav-link"
-              data-active={isHighlighted}
               style={{
                 position: "relative",
                 zIndex: 1,
@@ -346,14 +320,10 @@ export default function Nav() {
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
                 textDecoration: "none",
-                // Highlighted (hovered or the active section) always reads
-                // white since it's sitting on the solid black indicator.
-                // Contact otherwise stands out in the accent color as the
-                // one CTA-style link among plain section links.
                 color: isHighlighted
                   ? "#FFFFFF"
                   : isContact
-                    ? "#7DD3FC"
+                    ? "var(--primary)"
                     : isHero
                       ? "#AAAAAA"
                       : navColors.pillContentText,
@@ -363,7 +333,7 @@ export default function Nav() {
                 whiteSpace: "nowrap",
                 border:
                   isContact && !isHighlighted
-                    ? "1px solid rgba(125, 211, 252, 0.35)"
+                    ? "1px solid var(--primary-border)"
                     : "1px solid transparent",
                 transition: "color 0.2s ease, border-color 0.2s ease",
               }}
@@ -374,7 +344,6 @@ export default function Nav() {
         })}
       </nav>
 
-      {/* ── MOBILE HAMBURGER ── */}
       <div
         className="flex md:hidden"
         style={{
@@ -386,7 +355,7 @@ export default function Nav() {
         }}
       >
         <button
-          onClick={() => setMobileMenu(!isMobileMenuOpen)}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle Menu"
           aria-expanded={isMobileMenuOpen}
           aria-controls="mobile-nav-menu"
@@ -406,19 +375,48 @@ export default function Nav() {
             padding: 0,
           }}
         >
-          <span
-            style={{
-              fontSize: isMobileMenuOpen ? "18px" : "16px",
-              color: isHero ? "#FFFFFF" : navColors.pillContentText,
-              lineHeight: 1,
-            }}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            style={{ color: isHero ? "#FFFFFF" : navColors.pillContentText }}
           >
-            {isMobileMenuOpen ? "✕" : "☰"}
-          </span>
+            <line
+              x1="2"
+              y1={isMobileMenuOpen ? 3 : 4}
+              x2="14"
+              y2={isMobileMenuOpen ? 13 : 4}
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              style={{
+                transformOrigin: "50% 50%",
+                transform: isMobileMenuOpen ? "rotate(45deg)" : "none",
+                transition:
+                  "transform 0.25s ease, y1 0.25s ease, y2 0.25s ease",
+              }}
+            />
+            <line
+              x1="2"
+              y1={isMobileMenuOpen ? 13 : 12}
+              x2="14"
+              y2={isMobileMenuOpen ? 3 : 12}
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              style={{
+                transformOrigin: "50% 50%",
+                transform: isMobileMenuOpen ? "rotate(-45deg)" : "none",
+                transition:
+                  "transform 0.25s ease, y1 0.25s ease, y2 0.25s ease",
+              }}
+            />
+          </svg>
         </button>
       </div>
 
-      {/* ── MOBILE FULLSCREEN DROPDOWN ── */}
       <div
         id="mobile-nav-menu"
         aria-hidden={!isMobileMenuOpen}
@@ -426,7 +424,7 @@ export default function Nav() {
           position: "fixed",
           inset: 0,
           zIndex: 999,
-          background: "rgba(10, 10, 10, 0.95)",
+          background: "rgba(255, 255, 255, 0.97)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           display: "flex",
@@ -443,6 +441,7 @@ export default function Nav() {
         {LINKS.map(({ label, id }) => {
           const isContact = id === "contact";
           const isActive = activeId === id;
+
           return (
             <a
               key={id}
@@ -455,7 +454,7 @@ export default function Nav() {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 textDecoration: "none",
-                color: isContact ? "#7DD3FC" : "#FFFFFF",
+                color: isContact ? "var(--primary)" : "#0A0A0A",
                 opacity: isActive || isContact ? 1 : 0.75,
                 paddingBottom: "2px",
                 cursor: "pointer",

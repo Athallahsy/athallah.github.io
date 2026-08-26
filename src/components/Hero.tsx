@@ -2,14 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from "@/lib/gsap";
 
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
 
     // Semua elemen langsung di posisi/opacity final — tidak ada entrance animation
     gsap.set(
@@ -63,7 +61,7 @@ export default function Hero() {
       id="hero"
       ref={heroRef}
       className="relative w-full overflow-hidden"
-      style={{ minHeight: "100svh", background: "#080808" }}
+      style={{ minHeight: "100svh", background: "#FAFAFA" }}
     >
       {/* Visually hidden h1 for SEO & screen readers — no visual change */}
       <h1 className="sr-only">

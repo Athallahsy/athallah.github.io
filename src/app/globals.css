@@ -1,15 +1,41 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #0369a1;
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0284c7;
+  --color-primary-600: #0369a1;
+  --color-primary-700: #075985;
+  --color-primary-800: #0c4a6e;
+  --color-primary-900: #082f49;
+  --color-primary-hover: #38bdf8;
+  --color-primary-active: #075985;
+}
+
 :root {
-  --bg: #f3f2ee; /* background utama, warm off-white */
-  --bg-card: #ffffff;
-  --text: #131311;
-  --text-muted: #8c8b87;
-  --accent: #1e4a34; /* deep forest green — warna utama brand */
-  --accent-mid: #2e7a55;
-  --accent-light: #bed8c8;
-  --gold: #b8924e; /* aksen sekunder */
-  --border: #e0ded9;
+  --bg: #080808;           /* background utama, pitch black */
+  --bg-card: #121212;
+  --text: #ffffff;
+  --text-muted: #94a3b8;
+  
+  /* Brand / Accent Design Tokens (Base: #0369A1) */
+  --primary: #0369a1;
+  --primary-hover: #38bdf8;       /* versi lebih terang untuk hover/highlight */
+  --primary-light: #7dd3fc;       /* versi tint terang */
+  --primary-active: #075985;      /* versi lebih gelap untuk active/pressed */
+  --primary-bg: rgba(3, 105, 161, 0.15); /* tint background */
+  --primary-border: rgba(3, 105, 161, 0.35); /* border accent */
+
+  /* Backward compatibility aliases */
+  --accent: var(--primary);       /* #0369a1 — warna utama brand konsisten */
+  --accent-mid: var(--primary-hover);
+  --accent-light: var(--primary-bg);
+  --gold: #b8924e;         /* aksen sekunder */
+  --border: #27272a;
 
   /* Font variables populated via layout.tsx */
   --font-space-grotesk: 'Space Grotesk', sans-serif;
@@ -37,7 +63,7 @@ body {
 
 /* ======================== NAV ======================== */
 nav.scrolled {
-  background: #f3f2ee;
+  background: #121212;
   border-color: var(--border);
 }
 
@@ -151,7 +177,7 @@ html {
   background: rgba(255, 255, 255, 0.25);
 }
 ::-webkit-scrollbar-thumb:active {
-  background: rgba(125, 211, 252, 0.4); /* ice blue tipis saat aktif di-drag */
+  background: rgba(3, 105, 161, 0.4); /* biru primary tipis saat aktif di-drag */
 }
 html {
   scrollbar-width: none; /* Firefox */

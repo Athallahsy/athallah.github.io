@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI tools & local agent configurations
+.claude/
+.gemini/
+.impeccable/
+

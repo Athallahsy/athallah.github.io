@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap } from "@/lib/gsap";
 
 interface ScrollRevealProps {
   text: string;
@@ -12,7 +9,11 @@ interface ScrollRevealProps {
   style?: React.CSSProperties;
 }
 
-export default function ScrollReveal({ text, className, style }: ScrollRevealProps) {
+export default function ScrollReveal({
+  text,
+  className,
+  style,
+}: ScrollRevealProps) {
   const containerRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
@@ -25,9 +26,9 @@ export default function ScrollReveal({ text, className, style }: ScrollRevealPro
     const ctx = gsap.context(() => {
       gsap.fromTo(
         chars,
-        { color: "#6B6B6B" },
+        { color: "#3F3F46" },
         {
-          color: "#F5F5F5",
+          color: "#FFFFFF",
           stagger: 0.015,
           ease: "none",
           scrollTrigger: {
@@ -36,7 +37,7 @@ export default function ScrollReveal({ text, className, style }: ScrollRevealPro
             end: "bottom 65%",
             scrub: true,
           },
-        }
+        },
       );
     }, container);
 
@@ -68,7 +69,7 @@ export default function ScrollReveal({ text, className, style }: ScrollRevealPro
               key={charIdx}
               className="char-span"
               style={{
-                color: "#6B6B6B",
+                color: "#3F3F46",
                 willChange: "color",
                 display: "inline-block",
               }}

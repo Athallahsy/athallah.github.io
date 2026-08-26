@@ -56,10 +56,19 @@ export default function Lanyard({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const check = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        setIsMobile(window.innerWidth < 768);
+      }, 150);
+    };
+    setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", check);
+    };
   }, []);
 
   const [posX, posY, posZ] = position;
@@ -178,6 +187,16 @@ function Band({
   const rot = useRef(new THREE.Vector3()).current;
   const dir = useRef(new THREE.Vector3()).current;
 
+  // "Sendok" tambahan yang dipake ulang tiap frame di useFrame — daripada
+  // bikin THREE.Vector3 / THREE.Quaternion baru 60x per detik (yang bikin
+  // "sampah" numpuk dan bisa nyebabin micro-stutter pas dibersihin), kita
+  // siapin sekali di sini terus isinya ditimpa ulang tiap frame pakai
+  // .set()/.copy() (yang gak bikin objek baru).
+  const scratchVec = useRef(new THREE.Vector3()).current;
+  const scratchQuat = useRef(new THREE.Quaternion()).current;
+  const hookOffsetVec = useRef(new THREE.Vector3()).current;
+  const hookPosVec = useRef(new THREE.Vector3()).current;
+
   const segmentProps = {
     type: "dynamic" as const,
     canSleep: false,
@@ -281,42 +300,50 @@ function Band({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const lerped = (ref.current as any).lerped as THREE.Vector3 | undefined;
         const currentTranslation = ref.current.translation();
-        const currentVec = new THREE.Vector3(currentTranslation.x, currentTranslation.y, currentTranslation.z);
+        // Timpa scratchVec yang udah ada, bukan bikin Vector3 baru.
+        scratchVec.set(
+          currentTranslation.x,
+          currentTranslation.y,
+          currentTranslation.z,
+        );
         if (!lerped) {
+          // Cuma di sini kita beneran perlu .clone() — soalnya nilai ini
+          // mesti "nempel"/disimpan permanen di ref.current.lerped buat
+          // dipake terus di frame-frame berikutnya, bukan sekadar dipakai
+          // sekali lalu dibuang.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (ref.current as any).lerped = currentVec.clone();
+          (ref.current as any).lerped = scratchVec.clone();
           return;
         }
         const clampedDistance = Math.max(
           0.1,
-          Math.min(1, lerped.distanceTo(currentVec)),
+          Math.min(1, lerped.distanceTo(scratchVec)),
         );
         lerped.lerp(
-          currentVec,
+          scratchVec,
           delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)),
         );
       });
 
       const cardTrans = card.current!.translation();
       const cardRot = card.current!.rotation();
-      const hookOffset = new THREE.Vector3(0, 1.15, 0).applyQuaternion(
-        new THREE.Quaternion(cardRot.x, cardRot.y, cardRot.z, cardRot.w),
-      );
-      const hookPos = new THREE.Vector3(cardTrans.x, cardTrans.y, cardTrans.z).add(hookOffset);
+      scratchQuat.set(cardRot.x, cardRot.y, cardRot.z, cardRot.w);
+      hookOffsetVec.set(0, 1.15, 0).applyQuaternion(scratchQuat);
+      hookPosVec.set(cardTrans.x, cardTrans.y, cardTrans.z).add(hookOffsetVec);
 
       const getRefVec = (ref: React.RefObject<RapierRigidBody | null>) => {
-        if (!ref.current) return new THREE.Vector3();
+        if (!ref.current) return scratchVec.set(0, 0, 0);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const lerped = (ref.current as any).lerped as THREE.Vector3 | undefined;
         if (lerped) return lerped;
         const t = ref.current.translation();
-        return new THREE.Vector3(t.x, t.y, t.z);
+        return scratchVec.set(t.x, t.y, t.z);
       };
 
       const j5t = j5.current!.translation();
       const fixedt = fixed.current.translation();
 
-      curve.points[0].copy(hookPos);
+      curve.points[0].copy(hookPosVec);
       curve.points[1].set(j5t.x, j5t.y, j5t.z);
       curve.points[2].copy(getRefVec(j4));
       curve.points[3].copy(getRefVec(j3));
@@ -325,12 +352,17 @@ function Band({
       curve.points[6].set(fixedt.x, fixedt.y, fixedt.z);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (band.current as any)?.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+      (band.current as any)?.geometry.setPoints(
+        curve.getPoints(isMobile ? 16 : 32),
+      );
       const angVel = card.current!.angvel();
       const cardRotation = card.current!.rotation();
       rot.set(cardRotation.x, cardRotation.y, cardRotation.z);
       ang.set(angVel.x, angVel.y, angVel.z);
-      card.current!.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z }, true);
+      card.current!.setAngvel(
+        { x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z },
+        true,
+      );
     }
   });
 
@@ -393,7 +425,13 @@ function Band({
               drag(
                 new THREE.Vector3()
                   .copy(e.point)
-                  .sub(vec.set(cardTranslation.x, cardTranslation.y, cardTranslation.z)),
+                  .sub(
+                    vec.set(
+                      cardTranslation.x,
+                      cardTranslation.y,
+                      cardTranslation.z,
+                    ),
+                  ),
               );
               if (setIsDragging) setIsDragging(true);
             }}

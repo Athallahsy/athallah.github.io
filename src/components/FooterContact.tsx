@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from "@/lib/gsap";
 
 /* ─────────────────────────────────────────
    ICON COMPONENTS
@@ -33,6 +32,13 @@ const IconLinkedin = () => (
 );
 
 const ROTATING_WORDS = ["grow", "build", "ship", "create", "launch"];
+
+// Kata terpanjang di ROTATING_WORDS dipakai buat nentuin lebar minimum
+// slot rotasi, biar kata sepanjang apapun ("launch" vs "ship") gak bikin
+// teks di sebelahnya kedorong/geser pas gonta-ganti.
+const LONGEST_WORD_LENGTH = Math.max(
+  ...ROTATING_WORDS.map((word) => word.length),
+);
 
 function RotatingWord({ reduceMotion }: { reduceMotion: boolean }) {
   const containerRef = useRef<HTMLSpanElement>(null);
@@ -86,14 +92,14 @@ function RotatingWord({ reduceMotion }: { reduceMotion: boolean }) {
         height: "1em",
         lineHeight: 1,
         verticalAlign: "-0.08em",
-        minWidth: "4.5ch",
+        minWidth: `${LONGEST_WORD_LENGTH + 0.5}ch`,
       }}
     >
       {/* Current word */}
       <span
         ref={currentRef}
         className="inline-block will-change-transform"
-        style={{ fontStyle: "normal", color: "#7DD3FC" }}
+        style={{ fontStyle: "normal", color: "var(--primary)" }}
       >
         {ROTATING_WORDS[0]}
       </span>
@@ -102,7 +108,11 @@ function RotatingWord({ reduceMotion }: { reduceMotion: boolean }) {
         ref={nextRef}
         aria-hidden="true"
         className="absolute left-0 top-0 inline-block will-change-transform"
-        style={{ opacity: 0, transform: "translateY(100%)", color: "#7DD3FC" }}
+        style={{
+          opacity: 0,
+          transform: "translateY(100%)",
+          color: "var(--primary)",
+        }}
       >
         {ROTATING_WORDS[1]}
       </span>
@@ -119,6 +129,8 @@ const CONTACT_COLUMNS = [
   },
   {
     label: "WhatsApp",
+    // TODO: nomor di bawah ini masih placeholder/contoh — ganti ke nomor
+    // WhatsApp asli sebelum deploy ke production.
     value: "Chat on WhatsApp",
     href: "https://wa.me/6281234567890",
     target: "_blank",
@@ -147,15 +159,23 @@ export default function FooterContact() {
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const onChange = (e: MediaQueryListEvent | MediaQueryList) =>
-      setReduceMotion((e as MediaQueryListEvent).matches ?? motionQuery.matches);
+      setReduceMotion(
+        (e as MediaQueryListEvent).matches ?? motionQuery.matches,
+      );
     // Set initial value via the change handler to satisfy lint
     onChange(motionQuery);
-    motionQuery.addEventListener("change", onChange as (e: MediaQueryListEvent) => void);
-    return () => motionQuery.removeEventListener("change", onChange as (e: MediaQueryListEvent) => void);
+    motionQuery.addEventListener(
+      "change",
+      onChange as (e: MediaQueryListEvent) => void,
+    );
+    return () =>
+      motionQuery.removeEventListener(
+        "change",
+        onChange as (e: MediaQueryListEvent) => void,
+      );
   }, []);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     if (!section) return;
 
@@ -268,16 +288,14 @@ export default function FooterContact() {
                 href={href}
                 target={target}
                 rel={target ? "noreferrer" : undefined}
+                className="inline-block rounded-sm outline-none transition-opacity duration-200 hover:opacity-60 focus-visible:opacity-60 focus-visible:ring-1 focus-visible:ring-white/40"
                 style={{
                   fontSize: 16,
                   fontWeight: 500,
                   color: "#ffffff",
                   textDecoration: "none",
                   fontFamily: "var(--font-jakarta)",
-                  transition: "opacity 0.2s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.6")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
                 {value}
               </a>
@@ -307,25 +325,13 @@ export default function FooterContact() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
+                  className="flex items-center justify-center rounded-full outline-none transition-colors duration-200 bg-white/10 hover:bg-white/25 focus-visible:bg-white/25 focus-visible:ring-1 focus-visible:ring-white/40"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                     width: 36,
                     height: 36,
-                    borderRadius: "50%",
-                    background: "rgba(255,255,255,0.1)",
                     color: "#ffffff",
-                    transition: "background 0.2s",
                     textDecoration: "none",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background =
-                      "rgba(255,255,255,0.25)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-                  }
                 >
                   <Icon />
                 </a>
@@ -364,16 +370,14 @@ export default function FooterContact() {
                 <a
                   key={id}
                   href={`#${id}`}
+                  className="inline-block rounded-sm outline-none transition-opacity duration-200 hover:opacity-50 focus-visible:opacity-50 focus-visible:ring-1 focus-visible:ring-white/40"
                   style={{
                     fontSize: 13,
                     fontWeight: 600,
                     color: "#ffffff",
                     textDecoration: "none",
                     fontFamily: "var(--font-jakarta)",
-                    transition: "opacity 0.2s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                 >
                   {label}
                 </a>
@@ -397,16 +401,14 @@ export default function FooterContact() {
             </div>
             <a
               href="#"
+              className="inline-block rounded-sm outline-none transition-opacity duration-200 hover:opacity-50 focus-visible:opacity-50 focus-visible:ring-1 focus-visible:ring-white/40"
               style={{
                 fontSize: 13,
                 fontWeight: 600,
                 color: "#ffffff",
                 textDecoration: "none",
                 fontFamily: "var(--font-jakarta)",
-                transition: "opacity 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
               Terms of service
             </a>
@@ -421,7 +423,7 @@ export default function FooterContact() {
               fontFamily: "var(--font-jakarta)",
             }}
           >
-            © 2026 Athallah Muhammad Syaffa
+            © {new Date().getFullYear()} Athallah Muhammad Syaffa
           </div>
         </div>
       </div>
@@ -446,7 +448,7 @@ export default function FooterContact() {
                 "linear-gradient(to bottom, #000 0%, #000 58%, transparent 82%)",
             }}
           >
-            BUILD SOMETHING.{" "}
+            BUILT BY ATHALLAH.{" "}
           </div>
 
           {/* Blur layer */}
@@ -464,26 +466,8 @@ export default function FooterContact() {
                 "linear-gradient(to bottom, transparent 45%, #000 68%, #000 100%)",
             }}
           >
-            BUILD SOMETHING.{" "}
+            BUILT BY ATHALLAH.{" "}
           </div>
-
-          {/* Soft glow
-          <div
-            aria-hidden
-            className="absolute inset-0 whitespace-nowrap text-center font-bold uppercase tracking-[-0.04em] leading-[0.88]"
-            style={{
-              color: "#fff",
-              filter: "blur(24px)",
-              opacity: 0.25,
-              transform: "translateY(6px)",
-              WebkitMaskImage:
-                "linear-gradient(to bottom, transparent 50%, #000 75%, #000 100%)",
-              maskImage:
-                "linear-gradient(to bottom, transparent 50%, #000 75%, #000 100%)",
-            }}
-          >
-            Athallah Developer
-          </div> */}
         </div>
       </div>
     </footer>

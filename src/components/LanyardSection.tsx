@@ -1,13 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense, useState, useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { ScrollTrigger } from "@/lib/gsap";
 import ScrollReveal from "./ScrollReveal";
-import Particles from "./Particles";
 
-gsap.registerPlugin(ScrollTrigger);
+const SplashCursor = dynamic(() => import("./Splashcursor"), { ssr: false });
 
 const Lanyard = dynamic(() => import("./Lanyard"), {
   ssr: false,
@@ -19,8 +17,8 @@ const Lanyard = dynamic(() => import("./Lanyard"), {
       <div
         className="w-[60px] h-[60px] rounded-full border-2 animate-spin"
         style={{
-          borderColor: "rgba(125, 211, 252, 0.2)",
-          borderTopColor: "#7DD3FC",
+          borderColor: "var(--primary-border)",
+          borderTopColor: "var(--primary)",
         }}
       />
     </div>
@@ -28,16 +26,19 @@ const Lanyard = dynamic(() => import("./Lanyard"), {
 });
 
 export default function LanyardSection() {
-  const [showParticles, setShowParticles] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const [startEntrance, setStartEntrance] = useState(false);
+  const [showSplashCursor, setShowSplashCursor] = useState(false);
 
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
-      setShowParticles(window.innerWidth >= 768);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        setShowSplashCursor(window.innerWidth >= 768);
+      }, 150);
     };
-    // Trigger once on mount via the same handler (avoids setState-in-effect lint error)
-    handleResize();
+    setShowSplashCursor(window.innerWidth >= 768);
     window.addEventListener("resize", handleResize);
 
     const trigger = ScrollTrigger.create({
@@ -48,6 +49,7 @@ export default function LanyardSection() {
     });
 
     return () => {
+      clearTimeout(resizeTimer);
       window.removeEventListener("resize", handleResize);
       trigger.kill();
     };
@@ -60,18 +62,22 @@ export default function LanyardSection() {
       className="relative overflow-hidden"
       style={{ background: "#080808", padding: "100px 64px 100px" }}
     >
-      {/* Background Particles Layer */}
-      {showParticles && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <Particles
-            particleColors={["#ffffff", "#a0a0a0"]}
-            particleCount={100}
-            particleSpread={8}
-            speed={0.05}
-            particleBaseSize={100}
-            moveParticlesOnHover={false}
-            alphaParticles={true}
-            disableRotation={false}
+      {/* ── Background layer: SplashCursor (WebGL fluid sim) ── */}
+      {showSplashCursor && (
+        <div
+          className="absolute inset-0 z-0"
+          aria-hidden
+          style={{ pointerEvents: "none" }}
+        >
+          <SplashCursor
+            PRESSURE={0.35}
+            SPLAT_RADIUS={0.15}
+            SPLAT_FORCE={4500}
+            DENSITY_DISSIPATION={3}
+            VELOCITY_DISSIPATION={1.25}
+            COLOR="#0369A1"
+            BACK_COLOR={{ r: 0, g: 0, b: 0 }}
+            TRANSPARENT
           />
         </div>
       )}
@@ -82,34 +88,18 @@ export default function LanyardSection() {
           className="lanyard-text flex-1 min-w-0 pointer-events-auto"
           style={{ maxWidth: "480px" }}
         >
-          <div className="flex items-center gap-4 mb-5 overflow-hidden">
-            <span
-              className="text-[11px] font-semibold tracking-[0.2em] uppercase"
-              style={{ color: "#7DD3FC" }}
-            >
-              ABOUT ME
-            </span>
-            <div
-              className="flex-shrink-0"
-              style={{
-                width: "44px",
-                height: "1px",
-                background: "#7DD3FC",
-              }}
-            />
-          </div>
           <h2
             className="font-display font-bold leading-tight mb-6"
             style={{
               fontSize: "clamp(32px, 4.5vw, 54px)",
               letterSpacing: "-0.025em",
-              color: "#ffffff",
+              color: "#FFFFFF",
               fontVariationSettings: "'opsz' 72",
             }}
           >
             Hi, I&apos;m
             <br />
-            <span style={{ fontStyle: "italic", color: "#7DD3FC" }}>
+            <span style={{ fontStyle: "italic", color: "var(--primary)" }}>
               Athallah.
             </span>
           </h2>
@@ -130,8 +120,6 @@ export default function LanyardSection() {
               text="Outside of code, I'm a Hafiz of the Quran (30 Juz) — something that taught me patience and discipline long before I ever wrote a line of code."
               style={{
                 fontWeight: 400,
-                borderLeft: "2px solid #7DD3FC",
-                paddingLeft: "16px",
                 marginTop: "12px",
               }}
             />
