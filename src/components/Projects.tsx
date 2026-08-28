@@ -93,44 +93,25 @@ const ARCHIVE_PROJECTS = [
   },
 ];
 
-// SVG Variant A: Round / Chubby Cloud
-function CloudVariantA({ className }: { className?: string }) {
+// Technical Grid Blueprint Mark
+function CoordinateCross({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 100 50" fill="currentColor">
-      <path d="M 20,40 Q 8,40 8,28 Q 8,16 20,15 Q 26,5 40,8 Q 50,0 64,8 Q 78,5 84,18 Q 94,20 94,30 Q 94,40 82,40 Z" />
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 2V14M2 8H14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }
 
-// SVG Variant B: Elongated / Flatter Cloud
-function CloudVariantB({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 120 35" fill="currentColor">
-      <path d="M 12,28 Q 3,28 3,19 Q 3,10 14,9 Q 22,2 35,5 Q 46,-1 58,4 Q 68,0 78,7 Q 88,3 96,10 Q 106,12 106,20 Q 106,28 95,28 Z" />
-    </svg>
-  );
-}
-
-// Small pill/chip used for the status badge and the tech tags.
-// Keeping this as one component means every badge/tag on the section
-// shares the exact same radius, padding and type scale.
+// Small pill/chip used for tech tags and metadata
 function Chip({
   children,
-  tone = "solid",
 }: {
   children: React.ReactNode;
-  tone?: "accent" | "solid";
 }) {
-  const base =
-    "inline-flex items-center whitespace-nowrap rounded-full text-[11px] font-semibold";
-  const toneClass =
-    tone === "accent"
-      ? "px-3 py-1 border border-primary text-primary uppercase tracking-[0.06em]"
-      : "tag-chip px-2.5 py-1 border border-[#27272A] bg-[#1A1A1A] text-[#94A3B8]";
   return (
     <span
-      className={`${base} ${toneClass}`}
-      style={{ fontFamily: "var(--font-jakarta)" }}
+      className="tag-chip inline-flex items-center whitespace-nowrap rounded px-2.5 py-1 border border-[#27272A] bg-[#121212] text-xs font-medium text-[#A1A1AA] transition-colors hover:border-[#3F3F46]"
+      style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
     >
       {children}
     </span>
@@ -299,7 +280,7 @@ export default function Projects() {
           },
           onUpdate: (self) => {
             if (progressBarRef.current) {
-              progressBarRef.current.style.width = `${self.progress * 100}%`;
+              progressBarRef.current.style.transform = `scaleX(${self.progress})`;
             }
           },
         },
@@ -503,8 +484,8 @@ export default function Projects() {
           pointerEvents: "none",
           fontFamily: "var(--font-anton)",
           zIndex: 0,
-          transform: "translateZ(0)",
-          willChange: "transform",
+          // willChange is set by GSAP automatically when the ScrollTrigger animation begins.
+          // Declaring it statically on an element that only moves at 0.12x speed is wasteful.
         }}
       >
         WORK
@@ -531,7 +512,7 @@ export default function Projects() {
           style={{
             width: 140,
             height: 3,
-            background: "rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.08)",
             borderRadius: 9999,
             overflow: "hidden",
           }}
@@ -540,10 +521,12 @@ export default function Projects() {
             ref={progressBarRef}
             style={{
               height: "100%",
-              width: "0%",
+              width: "100%",
+              transform: "scaleX(0)",
+              transformOrigin: "left center",
               background: "var(--primary)",
               borderRadius: 9999,
-              transition: "width 0.05s linear",
+              willChange: "transform",
             }}
           />
         </div>
@@ -555,23 +538,23 @@ export default function Projects() {
         className="w-full lg:h-full lg:flex lg:items-center lg:px-20 lg:gap-16 lg:w-max py-28 lg:py-0 px-6 max-w-[1200px] lg:max-w-none mx-auto lg:mx-0 relative z-10"
         style={{ transform: "translateZ(0)", willChange: "transform" }}
       >
-        {/* Cloud parallax layer (z-5) */}
+        {/* Technical Blueprint Coordinate Layer (z-5) */}
         <div
           ref={cloudsRef}
-          className="hidden lg:block pointer-events-none absolute top-0 left-0 h-full z-5 overflow-hidden"
+          className="hidden lg:block pointer-events-none absolute top-0 left-0 h-full z-5 overflow-hidden text-white/[0.08]"
           style={{ transform: "translateZ(0)", willChange: "transform" }}
         >
-          <CloudVariantA className="absolute top-[12%] left-[4%] w-[180px] h-[60px] opacity-30 text-primary-300" />
-          <CloudVariantB className="absolute top-[68%] left-[13%] w-[240px] h-[75px] opacity-25 text-primary-400" />
-          <CloudVariantA className="absolute top-[18%] left-[22%] w-[200px] h-[65px] opacity-35 text-primary-300" />
-          <CloudVariantB className="absolute top-[72%] left-[31%] w-[220px] h-[70px] opacity-20 text-primary-400" />
-          <CloudVariantA className="absolute top-[14%] left-[40%] w-[190px] h-[60px] opacity-30 text-primary-300" />
-          <CloudVariantB className="absolute top-[65%] left-[49%] w-[250px] h-[80px] opacity-25 text-primary-400" />
-          <CloudVariantA className="absolute top-[20%] left-[58%] w-[210px] h-[68px] opacity-35 text-primary-300" />
-          <CloudVariantB className="absolute top-[70%] left-[67%] w-[230px] h-[72px] opacity-20 text-primary-400" />
-          <CloudVariantA className="absolute top-[15%] left-[76%] w-[185px] h-[62px] opacity-30 text-primary-300" />
-          <CloudVariantB className="absolute top-[66%] left-[85%] w-[245px] h-[78px] opacity-25 text-primary-400" />
-          <CloudVariantA className="absolute top-[18%] left-[94%] w-[205px] h-[66px] opacity-35 text-primary-300" />
+          <CoordinateCross className="absolute top-[15%] left-[4%]" />
+          <CoordinateCross className="absolute top-[68%] left-[13%]" />
+          <CoordinateCross className="absolute top-[22%] left-[22%]" />
+          <CoordinateCross className="absolute top-[75%] left-[31%]" />
+          <CoordinateCross className="absolute top-[18%] left-[40%]" />
+          <CoordinateCross className="absolute top-[65%] left-[49%]" />
+          <CoordinateCross className="absolute top-[20%] left-[58%]" />
+          <CoordinateCross className="absolute top-[72%] left-[67%]" />
+          <CoordinateCross className="absolute top-[15%] left-[76%]" />
+          <CoordinateCross className="absolute top-[66%] left-[85%]" />
+          <CoordinateCross className="absolute top-[25%] left-[94%]" />
         </div>
 
         {/* Trail canvas overlay (z-10: behind cards at z-20) */}
@@ -654,20 +637,37 @@ export default function Projects() {
                 {/* Info column */}
                 <div
                   className="flex flex-col justify-center lg:order-1 py-2"
-                  style={{ fontFamily: "var(--font-jakarta)" }}
                 >
                   <div>
-                    {/* Number sits as a large faded mark behind the badge —
-                        decorative sequence marker, not a data label. */}
-                    <div className="relative mb-1 inline-block">
+                    {/* Number sits as a large subtle sequence marker */}
+                    <div className="relative mb-2 inline-block">
                       <span
                         aria-hidden
-                        className="pointer-events-none absolute -left-1 -top-4 select-none text-4xl font-black leading-none text-white/[0.05] md:text-5xl"
+                        className="pointer-events-none absolute -left-1 -top-4 select-none text-4xl font-black leading-none text-white/[0.06] md:text-5xl"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
                       >
                         {proj.num}
                       </span>
-                      <div className="relative pt-2">
-                        <Chip tone="accent">{proj.badge}</Chip>
+                      {/* Structured project metadata badges */}
+                      <div className="relative pt-2 flex flex-wrap items-center gap-2">
+                        {proj.badge.split("·").map((segment, segIdx) => {
+                          const tag = segment.trim();
+                          const isLive = tag.toLowerCase() === "live";
+                          return (
+                            <span
+                              key={segIdx}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
+                                isLive
+                                  ? "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                                  : "border border-[#27272A] bg-[#141414] text-white/90"
+                              }`}
+                              style={{ fontFamily: "var(--font-space-grotesk)" }}
+                            >
+                              {isLive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />}
+                              {tag}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -686,8 +686,8 @@ export default function Projects() {
 
                     {/* Description */}
                     <p
-                      className="mb-6 whitespace-pre-line text-sm leading-[1.7]"
-                      style={{ color: "#94A3B8" }}
+                      className="mb-6 whitespace-pre-line text-sm leading-[1.75]"
+                      style={{ fontFamily: "var(--font-jakarta)", color: "rgba(255,255,255,0.85)" }}
                     >
                       {proj.desc}
                     </p>
@@ -707,7 +707,8 @@ export default function Projects() {
                         href={proj.liveLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-semibold text-[#94A3B8] transition-colors hover:text-primary-hover"
+                        className="text-xs font-semibold text-white/90 transition-colors hover:text-primary-hover uppercase tracking-wider"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
                       >
                         Visit website ↗
                       </a>
@@ -717,7 +718,8 @@ export default function Projects() {
                         href={proj.githubLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-semibold text-[#94A3B8] transition-colors hover:text-primary-hover"
+                        className="text-xs font-semibold text-white/70 transition-colors hover:text-white uppercase tracking-wider"
+                        style={{ fontFamily: "var(--font-space-grotesk)" }}
                       >
                         GitHub repository ↗
                       </a>
@@ -725,18 +727,16 @@ export default function Projects() {
                   </div>
                 </div>
 
-                {/* Photo column — a "pinned photo" card, tilted per-project via
-                    `rotation`, straightens on hover; aspect ratio follows the
-                    project's real screenshot orientation instead of a fixed box. */}
+                {/* Photo column — Tactile dark industrial card frame with zero fuzzy shadow */}
                 <div className="flex items-center justify-center lg:order-2 w-full">
                   <div
                     className={`group relative w-full ${
                       isPortrait
                         ? "max-w-[260px] aspect-[3/4]"
                         : "max-w-[480px] aspect-[4/3]"
-                    } rounded-2xl border border-white/10 bg-[#1A1A1A] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-500 ease-out ${proj.rotation} hover:rotate-0 hover:shadow-[0_16px_40px_rgba(3,105,161,0.12)]`}
+                    } rounded-xl border border-[#27272A] bg-[#121214] p-2.5 transition-transform duration-300 ease-out ${proj.rotation} hover:rotate-0 hover:border-[#3F3F46]`}
                   >
-                    <div className="relative h-full w-full overflow-hidden rounded-xl bg-[#111111]">
+                    <div className="relative h-full w-full overflow-hidden rounded-lg bg-[#080808]">
                       <Image
                         src={proj.screenshot}
                         alt={proj.title}
@@ -744,7 +744,6 @@ export default function Projects() {
                         sizes="(max-width: 1024px) 100vw, 480px"
                         priority={index === 0}
                         className="card-image-parallax object-contain"
-                        style={{ willChange: "transform" }}
                       />
                     </div>
                   </div>
@@ -757,11 +756,10 @@ export default function Projects() {
         {/* Archive section (z-20) */}
         <div
           className="mt-20 lg:mt-0 pt-12 lg:pt-0 lg:pl-12 lg:border-l lg:border-[#27272A] border-t border-[#27272A] lg:border-t-0 lg:flex-shrink-0 lg:w-[420px] relative z-20"
-          style={{ fontFamily: "var(--font-jakarta)" }}
         >
           <span
             className="mb-5 block text-[11px] font-bold uppercase tracking-[0.2em]"
-            style={{ color: "#94A3B8" }}
+            style={{ fontFamily: "var(--font-space-grotesk)", color: "#A1A1AA" }}
           >
             {"// Also built"}
           </span>
@@ -775,26 +773,33 @@ export default function Projects() {
                 rel="noopener noreferrer"
                 className="group flex items-start gap-4 border-b border-[#27272A] py-4 first:pt-0 last:border-b-0"
               >
-                {/* Monogram thumbnail — echoes the photo column on the
-                    featured cards above so this list reads as part of the
-                    same system, not a plain leftover text block. */}
                 <span
                   aria-hidden
-                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border border-[#27272A] bg-[#1A1A1A] text-lg font-extrabold text-primary transition-colors group-hover:border-primary"
+                  className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[#27272A] bg-[#141414] text-base font-bold text-primary transition-colors group-hover:border-primary"
+                  style={{ fontFamily: "var(--font-space-grotesk)" }}
                 >
                   {item.title.charAt(0)}
                 </span>
-                <span className="flex flex-1 flex-col gap-1.5 pt-0.5">
-                  <span className="flex items-center justify-between text-lg font-bold text-[#FFFFFF]">
+                <span className="flex flex-1 flex-col gap-1 pt-0.5">
+                  <span
+                    className="flex items-center justify-between text-base font-bold text-[#FFFFFF]"
+                    style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  >
                     {item.title}
                     <span className="text-sm font-semibold text-[#94A3B8] transition-colors group-hover:text-primary-hover">
                       ↗
                     </span>
                   </span>
-                  <span className="text-sm leading-relaxed text-[#94A3B8]">
+                  <span
+                    className="text-xs leading-relaxed text-[#94A3B8]"
+                    style={{ fontFamily: "var(--font-jakarta)" }}
+                  >
                     {item.desc}
                   </span>
-                  <span className="text-xs font-medium text-[#94A3B8] transition-colors group-hover:text-primary-hover">
+                  <span
+                    className="text-[11px] font-medium text-[#71717A] transition-colors group-hover:text-primary-hover"
+                    style={{ fontFamily: "var(--font-space-grotesk)" }}
+                  >
                     {item.label}
                   </span>
                 </span>

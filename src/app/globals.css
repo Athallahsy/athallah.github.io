@@ -44,10 +44,14 @@
 }
 
 body {
-  font-family: var(--font-jakarta);
+  font-family: var(--font-space-grotesk), sans-serif;
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
+}
+
+p {
+  font-family: var(--font-jakarta), sans-serif;
 }
 
 /* Base custom font utility classes */
@@ -151,37 +155,12 @@ nav.scrolled {
 /* Footer styles now handled inline in FooterContact.tsx */
 
 
+
 /* ======================== SCROLLBAR ======================== */
-/* Default: scrollbar nyaris tak terlihat (blend ke background) */
-html {
-  scrollbar-width: thin; /* Firefox: track lebih tipis */
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent; /* Firefox: thumb transparan tipis */
-}
-
-/* Chrome, Edge, Safari (WebKit) */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  transition: background 0.25s ease;
-}
-
-/* Saat hover di area scrollbar ATAU saat halaman lagi di-scroll
-   (browser otomatis trigger :hover/:active di scrollbar pseudo-element) */
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-::-webkit-scrollbar-thumb:active {
-  background: rgba(3, 105, 161, 0.4); /* biru primary tipis saat aktif di-drag */
-}
+/* Hidden on all browsers — scrollbar hidden for the immersive portfolio aesthetic. */
 html {
   scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/legacy Edge, untuk jaga-jaga */
+  -ms-overflow-style: none; /* IE / legacy Edge */
 }
 
 /* Chrome, Edge, Safari (WebKit) */

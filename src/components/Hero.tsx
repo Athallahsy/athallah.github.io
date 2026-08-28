@@ -3,12 +3,12 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "@/lib/gsap";
+import BorderGlow from "./BorderGlow";
 
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-
     // Semua elemen langsung di posisi/opacity final — tidak ada entrance animation
     gsap.set(
       [
@@ -88,7 +88,7 @@ export default function Hero() {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse 80% 90% at 55% 40%, transparent 30%, rgba(0,0,0,0.55) 100%)",
+              "linear-gradient(to top right, rgba(8,8,8,0.95) 0%, rgba(8,8,8,0.75) 30%, transparent 65%), radial-gradient(ellipse 80% 90% at 55% 40%, transparent 20%, rgba(0,0,0,0.7) 100%)",
             pointerEvents: "none",
           }}
         />
@@ -101,7 +101,6 @@ export default function Hero() {
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 10,
-          overflow: "hidden",
           padding: "0 clamp(24px, 4vw, 64px)",
           pointerEvents: "none",
         }}
@@ -129,50 +128,63 @@ export default function Hero() {
         ))}
       </div>
 
-      {/* ── BOTTOM-LEFT: name + bio ── */}
-      <div
-        className="hero-corner-name absolute"
+      {/* ── BOTTOM-LEFT: name + bio with BorderGlow ── */}
+      <BorderGlow
+        className="hero-corner-name absolute cursor-default"
+        edgeSensitivity={30}
+        glowColor="40 80 80"
+        backgroundColor="#0A0A0C"
+        borderRadius={8}
+        glowRadius={40}
+        glowIntensity={1}
+        coneSpread={18}
+        animated={false}
+        colors={["#c084fc", "#f472b6", "#38bdf8"]}
+        fillOpacity={0}
         style={{
           bottom: "clamp(40px, 6vh, 72px)",
           left: "clamp(24px, 4vw, 64px)",
           zIndex: 20,
-          maxWidth: "340px",
+          maxWidth: "360px",
+          position: "absolute",
         }}
       >
-        <p
-          style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "clamp(10px, 3vw, 11px)",
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.45)",
-            marginBottom: "10px",
-          }}
-        >
-          Athallah Muhammad Syaffa
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "clamp(12px, 3.5vw, 13px)",
-            fontWeight: 300,
-            lineHeight: 1.8,
-            color: "rgba(255,255,255,0.55)",
-            maxWidth: "280px",
-          }}
-        >
-          Building end-to-end web applications — solid backend with{" "}
-          <strong style={{ fontWeight: 500, color: "rgba(255,255,255,0.8)" }}>
-            Laravel
-          </strong>{" "}
-          &amp; smooth interfaces with{" "}
-          <strong style={{ fontWeight: 500, color: "rgba(255,255,255,0.8)" }}>
-            React
-          </strong>
-          .
-        </p>
-      </div>
+        <div style={{ padding: "16px 20px" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-space-grotesk)",
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#FFFFFF",
+              marginBottom: "8px",
+            }}
+          >
+            Athallah Muhammad Syaffa
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-jakarta)",
+              fontSize: "13px",
+              fontWeight: 400,
+              lineHeight: 1.7,
+              color: "rgba(255,255,255,0.9)",
+              margin: 0,
+            }}
+          >
+            Building end-to-end web applications — solid backend with{" "}
+            <strong style={{ fontWeight: 600, color: "#FFFFFF" }}>
+              Laravel
+            </strong>{" "}
+            &amp; smooth interfaces with{" "}
+            <strong style={{ fontWeight: 600, color: "#FFFFFF" }}>
+              React
+            </strong>
+            .
+          </p>
+        </div>
+      </BorderGlow>
 
       {/* ── BOTTOM-RIGHT: CTA buttons ── */}
       <div
@@ -189,23 +201,28 @@ export default function Hero() {
             display: "inline-flex",
             alignItems: "center",
             gap: "8px",
-            padding: "13px 28px",
+            padding: "12px 26px",
             background: "#ffffff",
             color: "#080808",
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "10px",
+            fontFamily: "var(--font-space-grotesk)",
+            fontSize: "11px",
             fontWeight: 700,
-            letterSpacing: "0.15em",
+            letterSpacing: "0.12em",
             textTransform: "uppercase",
             textDecoration: "none",
-            transition: "opacity 0.25s",
+            borderRadius: "4px",
+            transition: "background-color 0.2s ease, color 0.2s ease",
           }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLAnchorElement).style.opacity = "0.85")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLAnchorElement).style.opacity = "1")
-          }
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLAnchorElement;
+            el.style.background = "var(--primary-hover)";
+            el.style.color = "#FFFFFF";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLAnchorElement;
+            el.style.background = "#FFFFFF";
+            el.style.color = "#080808";
+          }}
         >
           View Work →
         </a>
@@ -214,21 +231,21 @@ export default function Hero() {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "10px",
+            fontFamily: "var(--font-space-grotesk)",
+            fontSize: "11px",
             fontWeight: 600,
-            letterSpacing: "0.15em",
+            letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.5)",
+            color: "rgba(255,255,255,0.85)",
             textDecoration: "none",
-            transition: "color 0.25s",
+            transition: "color 0.2s ease",
           }}
           onMouseEnter={(e) =>
             ((e.currentTarget as HTMLAnchorElement).style.color = "#ffffff")
           }
           onMouseLeave={(e) =>
             ((e.currentTarget as HTMLAnchorElement).style.color =
-              "rgba(255,255,255,0.5)")
+              "rgba(255,255,255,0.85)")
           }
         >
           GitHub ↗
@@ -246,43 +263,48 @@ export default function Hero() {
           opacity: 0,
         }}
       >
-        <div
-          style={{
-            width: "1px",
-            height: "40px",
-            background: "rgba(255,255,255,0.3)",
-            position: "relative",
-            overflow: "hidden",
-          }}
+        <svg
+          width="2"
+          height="40"
+          viewBox="0 0 2 40"
+          fill="none"
+          aria-hidden="true"
+          className="scroll-hint-svg"
         >
-          <div
-            className="scroll-hint-line"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              background: "rgba(255,255,255,0.8)",
-              animation: "scrollLineAnim 1.8s ease-in-out infinite",
-            }}
+          <line
+            x1="1"
+            y1="0"
+            x2="1"
+            y2="40"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="1.5"
           />
-        </div>
+          <line
+            x1="1"
+            y1="0"
+            x2="1"
+            y2="40"
+            stroke="rgba(255,255,255,0.9)"
+            strokeWidth="1.5"
+            strokeDasharray="16 24"
+            className="scroll-hint-animated-line"
+          />
+        </svg>
         <span
           style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "9px",
+            fontFamily: "var(--font-space-grotesk)",
+            fontSize: "10px",
             fontWeight: 600,
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.4)",
+            color: "#FFFFFF",
           }}
         >
           Scroll
         </span>
       </div>
 
-      {/* ── OPEN TO WORK BADGE ── */}
+      {/* ── OPEN TO WORK BADGE (Crisp technical pill, no fuzzy neon glow) ── */}
       <div
         className="hero-open-to-work"
         style={{
@@ -293,32 +315,29 @@ export default function Hero() {
           display: "flex",
           alignItems: "center",
           gap: "8px",
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          backdropFilter: "blur(8px)",
-          padding: "8px 16px",
+          background: "#121214",
+          border: "1px solid #27272A",
+          borderRadius: "6px",
+          padding: "7px 14px",
         }}
       >
         <span
-          className="hero-status-dot"
           style={{
             width: "6px",
             height: "6px",
             borderRadius: "50%",
-            background: "#4ade80",
-            boxShadow: "0 0 8px #4ade80",
+            background: "#10B981",
             flexShrink: 0,
-            animation: "pulse 2s ease-in-out infinite",
           }}
         />
         <span
           style={{
-            fontFamily: "var(--font-jakarta)",
-            fontSize: "9px",
+            fontFamily: "var(--font-space-grotesk)",
+            fontSize: "10px",
             fontWeight: 600,
-            letterSpacing: "0.15em",
+            letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.7)",
+            color: "#FFFFFF",
           }}
         >
           Open to Work
@@ -327,20 +346,22 @@ export default function Hero() {
 
       {/* Keyframe animations */}
       <style>{`
-        @keyframes scrollLineAnim {
-          0%   { transform: translateY(-100%); opacity: 1; }
-          80%  { transform: translateY(100%);  opacity: 0.4; }
-          100% { transform: translateY(100%);  opacity: 0; }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.4; }
+        .scroll-hint-animated-line {
+          animation: scrollDashAnim 1.8s linear infinite;
         }
 
-        /* Respect the OS-level reduced-motion preference: freeze the two
-           looping micro-animations instead of running them indefinitely. */
+        @keyframes scrollDashAnim {
+          0%   { stroke-dashoffset: 40; }
+          100% { stroke-dashoffset: -40; }
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.5; transform: scale(1.15); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .scroll-hint-line { animation: none !important; opacity: 0.6; }
+          .scroll-hint-animated-line { animation: none !important; stroke-dashoffset: 0; opacity: 0.6; }
           .hero-status-dot  { animation: none !important; }
         }
 

@@ -35,10 +35,25 @@ export default function LanyardSection() {
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        setShowSplashCursor(window.innerWidth >= 768);
+        setShowSplashCursor(window.innerWidth >= 768 && isInViewRef.current);
       }, 150);
     };
-    setShowSplashCursor(window.innerWidth >= 768);
+
+    // Track section visibility — WebGL fluid sim only runs when the section
+    // is actually on screen. This prevents continuous GPU drain while the
+    // user is on other sections (Projects, Skills, Footer, etc).
+    const isInViewRef = { current: false };
+    const section = sectionRef.current;
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        const inView = entries[0]?.isIntersecting ?? false;
+        isInViewRef.current = inView;
+        setShowSplashCursor(inView && window.innerWidth >= 768);
+      },
+      { rootMargin: "100px" },
+    );
+    if (section) visibilityObserver.observe(section);
+
     window.addEventListener("resize", handleResize);
 
     const trigger = ScrollTrigger.create({
@@ -51,6 +66,7 @@ export default function LanyardSection() {
     return () => {
       clearTimeout(resizeTimer);
       window.removeEventListener("resize", handleResize);
+      visibilityObserver.disconnect();
       trigger.kill();
     };
   }, []);

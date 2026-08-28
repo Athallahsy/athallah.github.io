@@ -42,7 +42,8 @@ export default function TechStackStrip() {
     const BASE_SPEED = 0.35; // px/frame when idle — feels slow, calm
     const MAX_BOOST = 5.5; // max extra px/frame from scroll
     let scrollBoost = 0; // can be negative (scroll up reverses direction)
-    let lastDirection = 1; // ← TAMBAH: 1 = kanan, -1 = kiri
+    let lastDirection = 1; // 1 = kanan, -1 = kiri
+    let isVisible = false;
 
     // --- ScrollTrigger: read scroll velocity + direction ---
     const st = ScrollTrigger.create({
@@ -52,7 +53,6 @@ export default function TechStackStrip() {
         const rawVel = self.getVelocity(); // px/s, signed
         const dir = self.direction; // 1 = down, -1 = up
 
-        // ← SIMPAN lastDirection saat ada scroll (threshold biar tidak noise)
         if (Math.abs(rawVel) > 100) {
           lastDirection = dir;
         }
@@ -63,12 +63,16 @@ export default function TechStackStrip() {
       },
     });
 
-    // --- RAF loop: base motion always running ---
+    // --- RAF loop: only runs when section is visible ---
     const tick = () => {
+      if (!isVisible) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       // Decay scrollBoost toward 0 each frame (smooth return to base speed)
       scrollBoost *= 0.92;
 
-      // ← UBAH: BASE_SPEED dikali lastDirection
       const totalSpeed = BASE_SPEED * lastDirection + scrollBoost;
       xPos += totalSpeed;
 
@@ -80,10 +84,23 @@ export default function TechStackStrip() {
 
       rafRef.current = requestAnimationFrame(tick);
     };
+
+    // IntersectionObserver: pause animation when section is off-screen
+    // to avoid wasting main-thread budget when user is on other sections.
+    const section = track.closest("section");
+    const io = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? false;
+      },
+      { rootMargin: "200px" }, // start a bit before visible for smooth transition
+    );
+    if (section) io.observe(section);
+
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
       st.kill();
+      io.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);

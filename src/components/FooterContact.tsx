@@ -239,10 +239,10 @@ export default function FooterContact() {
         <div className="fc-headline mb-10">
           <h2
             style={{
-              fontFamily: "var(--font-jakarta)",
+              fontFamily: "var(--font-space-grotesk)",
               fontWeight: 700,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.08,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.05,
               fontSize: "clamp(2rem, 4.5vw, 3.2rem)",
               margin: 0,
             }}
@@ -258,7 +258,7 @@ export default function FooterContact() {
             {/* Line 2: "great products together." */}
             <span
               className="block"
-              style={{ color: "rgba(255,255,255,0.38)", fontStyle: "normal" }}
+              style={{ color: "rgba(255,255,255,0.45)", fontStyle: "normal" }}
             >
               great products together.
             </span>
@@ -273,11 +273,11 @@ export default function FooterContact() {
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.4)",
+                  color: "rgba(255,255,255,0.5)",
                   marginBottom: 10,
-                  fontFamily: "var(--font-jakarta)",
+                  fontFamily: "var(--font-space-grotesk)",
                 }}
               >
                 {label}
@@ -288,11 +288,11 @@ export default function FooterContact() {
                 rel={target ? "noreferrer" : undefined}
                 className="inline-block rounded-sm outline-none transition-opacity duration-200 hover:opacity-60 focus-visible:opacity-60 focus-visible:ring-1 focus-visible:ring-white/40"
                 style={{
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: 500,
                   color: "#ffffff",
                   textDecoration: "none",
-                  fontFamily: "var(--font-jakarta)",
+                  fontFamily: "var(--font-space-grotesk)",
                 }}
               >
                 {value}
@@ -306,11 +306,11 @@ export default function FooterContact() {
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.5)",
                 marginBottom: 10,
-                fontFamily: "var(--font-jakarta)",
+                fontFamily: "var(--font-space-grotesk)",
               }}
             >
               Social
@@ -354,11 +354,11 @@ export default function FooterContact() {
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.5)",
                 marginBottom: 10,
-                fontFamily: "var(--font-jakarta)",
+                fontFamily: "var(--font-space-grotesk)",
               }}
             >
               Menu
@@ -374,7 +374,7 @@ export default function FooterContact() {
                     fontWeight: 600,
                     color: "#ffffff",
                     textDecoration: "none",
-                    fontFamily: "var(--font-jakarta)",
+                    fontFamily: "var(--font-space-grotesk)",
                   }}
                 >
                   {label}
@@ -388,11 +388,11 @@ export default function FooterContact() {
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.5)",
                 marginBottom: 10,
-                fontFamily: "var(--font-jakarta)",
+                fontFamily: "var(--font-space-grotesk)",
               }}
             >
               Location
@@ -402,7 +402,7 @@ export default function FooterContact() {
                 fontSize: 13,
                 fontWeight: 500,
                 color: "#ffffff",
-                fontFamily: "var(--font-jakarta)",
+                fontFamily: "var(--font-space-grotesk)",
               }}
             >
               Bogor, Indonesia (GMT+7)
@@ -414,8 +414,8 @@ export default function FooterContact() {
             style={{
               fontSize: 12,
               fontWeight: 500,
-              color: "rgba(255,255,255,0.35)",
-              fontFamily: "var(--font-jakarta)",
+              color: "rgba(255,255,255,0.45)",
+              fontFamily: "var(--font-space-grotesk)",
             }}
           >
             © {new Date().getFullYear()} Athallah Muhammad Syaffa

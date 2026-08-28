@@ -193,8 +193,9 @@ export default function Nav() {
       const pillRect = pillEl.getBoundingClientRect();
       const linkRect = targetEl.getBoundingClientRect();
 
+      const targetX = linkRect.left - pillRect.left;
       gsap.to(indicatorEl, {
-        x: linkRect.left - pillRect.left,
+        x: targetX,
         width: linkRect.width,
         opacity: 1,
         duration: 0.35,
@@ -234,7 +235,10 @@ export default function Nav() {
   const sharedTransition: React.CSSProperties = {
     opacity: isHidden ? 0 : 1,
     transform: isHidden ? "translateY(-20px)" : "translateY(0)",
-    transition: navState === "visible" ? "all 0.25s ease-out" : "all 0.3s ease",
+    transition:
+      navState === "visible"
+        ? "opacity 0.25s ease-out, transform 0.25s ease-out"
+        : "opacity 0.3s ease, transform 0.3s ease",
   };
 
   return (
@@ -247,9 +251,10 @@ export default function Nav() {
           top: "24px",
           left: "clamp(24px, 6vw, 96px)",
           zIndex: 1000,
-          fontFamily: "var(--font-jakarta), sans-serif",
+          fontFamily: "var(--font-space-grotesk), sans-serif",
           fontSize: "16px",
-          fontWeight: 600,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
           textDecoration: "none",
           cursor: "pointer",
           ...sharedTransition,
@@ -282,20 +287,86 @@ export default function Nav() {
           ...sharedTransition,
         }}
       >
+        {/* ── TECHNICAL SCOPE / VIEWFINDER SLIDING INDICATOR ── */}
         <div
           ref={indicatorRef}
           style={{
             position: "absolute",
-            top: "6px",
+            top: "5px",
             left: 0,
-            height: "calc(100% - 12px)",
-            background: "#0A0A0A",
-            borderRadius: "999px",
+            height: "calc(100% - 10px)",
+            width: 0,
             opacity: 0,
             pointerEvents: "none",
             zIndex: 0,
           }}
-        />
+        >
+          {/* Inner Dashed Capsule Box */}
+          <div
+            style={{
+              position: "absolute",
+              inset: "2px",
+              borderRadius: "6px",
+              border: "1px dashed rgba(255, 255, 255, 0.45)",
+              background: "rgba(10, 10, 12, 0.75)",
+              boxShadow: "0 2px 10px rgba(0, 0, 0, 0.4)",
+            }}
+          />
+
+          {/* 4 Corner Viewfinder Brackets */}
+          {/* Top-Left: ┌ */}
+          <span
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "6px",
+              height: "6px",
+              borderTop: "1.5px solid #FFFFFF",
+              borderLeft: "1.5px solid #FFFFFF",
+              borderRadius: "1px",
+            }}
+          />
+          {/* Top-Right: ┐ */}
+          <span
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: "6px",
+              height: "6px",
+              borderTop: "1.5px solid #FFFFFF",
+              borderRight: "1.5px solid #FFFFFF",
+              borderRadius: "1px",
+            }}
+          />
+          {/* Bottom-Left: └ */}
+          <span
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "6px",
+              height: "6px",
+              borderBottom: "1.5px solid #FFFFFF",
+              borderLeft: "1.5px solid #FFFFFF",
+              borderRadius: "1px",
+            }}
+          />
+          {/* Bottom-Right: ┘ */}
+          <span
+            style={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              width: "6px",
+              height: "6px",
+              borderBottom: "1.5px solid #FFFFFF",
+              borderRight: "1.5px solid #FFFFFF",
+              borderRadius: "1px",
+            }}
+          />
+        </div>
 
         {LINKS.map(({ label, id }) => {
           const isHighlighted = indicatorTargetId === id;
@@ -314,7 +385,7 @@ export default function Nav() {
               style={{
                 position: "relative",
                 zIndex: 1,
-                fontFamily: "var(--font-jakarta), sans-serif",
+                fontFamily: "var(--font-space-grotesk), sans-serif",
                 fontSize: "12px",
                 fontWeight: isContact ? 700 : 600,
                 letterSpacing: "0.06em",
@@ -448,7 +519,7 @@ export default function Nav() {
               href={`#${id}`}
               onClick={(e) => handleClick(e, id)}
               style={{
-                fontFamily: "var(--font-jakarta), sans-serif",
+                fontFamily: "var(--font-space-grotesk), sans-serif",
                 fontSize: "20px",
                 fontWeight: isContact ? 700 : 600,
                 letterSpacing: "0.1em",

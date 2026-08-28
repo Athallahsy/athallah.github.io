@@ -56,18 +56,14 @@ export default function Lanyard({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const check = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        setIsMobile(window.innerWidth < 768);
-      }, 150);
+    const media = window.matchMedia("(max-width: 767px)");
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches);
     };
-    setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", check);
+    onChange(media);
+    media.addEventListener("change", onChange);
     return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener("resize", check);
+      media.removeEventListener("change", onChange);
     };
   }, []);
 

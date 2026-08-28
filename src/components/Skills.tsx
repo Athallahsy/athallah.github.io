@@ -356,11 +356,11 @@ export default function Skills() {
                 <span
                   style={{
                     display: "block",
-                    fontFamily: "var(--font-jakarta)",
+                    fontFamily: "var(--font-space-grotesk)",
                     fontSize: "clamp(15px, 1.5vw, 20px)",
                     fontWeight: 600,
                     letterSpacing: "-0.01em",
-                    color: isLearning ? "#94A3B8" : "#FFFFFF",
+                    color: isLearning ? "#71717A" : "#FFFFFF",
                     marginBottom: 5,
                     lineHeight: 1.2,
                   }}
@@ -372,11 +372,11 @@ export default function Skills() {
                 <span
                   style={{
                     display: "block",
-                    fontFamily: "var(--font-jakarta)",
+                    fontFamily: "var(--font-space-grotesk)",
                     fontSize: 11,
-                    fontWeight: 400,
+                    fontWeight: 500,
                     letterSpacing: "0.08em",
-                    color: "#94A3B8",
+                    color: "#71717A",
                     textTransform: "uppercase",
                   }}
                 >
@@ -394,10 +394,11 @@ export default function Skills() {
                       fontWeight: 700,
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "#94A3B8",
-                      border: "1px dashed #27272A",
+                      color: "#A1A1AA",
+                      border: "1px dashed #3F3F46",
                       padding: "3px 7px",
-                      fontFamily: "var(--font-jakarta)",
+                      borderRadius: "2px",
+                      fontFamily: "var(--font-space-grotesk)",
                     }}
                   >
                     LEARNING

@@ -29,6 +29,16 @@ export const metadata: Metadata = {
   title: "Athallah Muhammad Syaffa — Fullstack Developer",
   description:
     "Portfolio of Athallah Muhammad Syaffa, a Fullstack Developer specializing in Laravel & React. Explore my projects and skills.",
+  keywords: [
+    "Athallah Muhammad Syaffa",
+    "Fullstack Developer",
+    "Laravel",
+    "React",
+    "Next.js",
+    "Portfolio",
+    "Web Developer Indonesia",
+    "PHP Developer",
+  ],
   alternates: {
     canonical: "/",
   },
@@ -52,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Athallah Muhammad Syaffa — Fullstack Developer",
     description:
-      "Portfolio of Athallah Muhammad Syaffa — Fullstack Developer (Laravel & React) in progress.",
+      "Portfolio of Athallah Muhammad Syaffa, a Fullstack Developer specializing in Laravel & React. Explore my projects and skills.",
     images: ["/images/profile.png"],
   },
   robots: { index: true, follow: true },
