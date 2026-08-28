@@ -193,7 +193,7 @@ export default function Skills() {
       animateHeaderAndGrid();
     });
 
-    let resizeTimer: NodeJS.Timeout;
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {

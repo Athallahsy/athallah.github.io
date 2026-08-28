@@ -13,77 +13,21 @@ const LINKS = [
   { label: "Contact", id: "contact" },
 ];
 
-const parseRgba = (str: string) => {
-  const match = str.match(
-    /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/,
-  );
-  if (!match) return null;
-  return {
-    r: Number(match[1]),
-    g: Number(match[2]),
-    b: Number(match[3]),
-    a: match[4] !== undefined ? Number(match[4]) : 1,
-  };
-};
 
-const luminance = (r: number, g: number, b: number) => {
-  const norm = [r, g, b].map((c) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * norm[0] + 0.7152 * norm[1] + 0.0722 * norm[2];
-};
-
-const sampleAt = (x: number, y: number): number | null => {
-  let el = document.elementFromPoint(x, y) as HTMLElement | null;
-  while (el) {
-    const bg = window.getComputedStyle(el).backgroundColor;
-    const parsed = parseRgba(bg);
-    if (parsed && parsed.a > 0) {
-      return luminance(parsed.r, parsed.g, parsed.b);
-    }
-    el = el.parentElement;
-  }
-  return null;
-};
 
 export default function Nav() {
   const [navState, setNavState] = useState<NavState>("hero");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredId, setHoveredId] = useState("");
   const [activeId, setActiveId] = useState("");
-  const [lightness, setLightness] = useState(0);
 
   const pillRef = useRef<HTMLDivElement | null>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const indicatorRef = useRef<HTMLDivElement | null>(null);
-  const smoothedLightness = useRef(0);
 
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
-    let scrollCount = 0;
-    const SAMPLE_EVERY = 3;
-
-    const targetLightness = { current: 0 };
-    let smoothRafId: number | null = null;
-
-    const tick = () => {
-      const current = smoothedLightness.current;
-      const target = targetLightness.current;
-      const next = current + (target - current) * 0.08;
-      smoothedLightness.current = next;
-      setLightness(next);
-      if (Math.abs(target - next) > 0.002) {
-        smoothRafId = requestAnimationFrame(tick);
-      } else {
-        smoothRafId = null;
-      }
-    };
-
-    const startSmoothing = () => {
-      if (smoothRafId === null) smoothRafId = requestAnimationFrame(tick);
-    };
 
     const processScroll = () => {
       const y = window.scrollY;
@@ -93,20 +37,6 @@ export default function Nav() {
       else setNavState("visible");
 
       lastY = y;
-
-      if (y >= 80) {
-        scrollCount++;
-        if (scrollCount % SAMPLE_EVERY === 0) {
-          const sampleX = Math.max(window.innerWidth - 120, 0);
-          const sampleY = 40;
-          const result = sampleAt(sampleX, sampleY);
-          if (result !== null) {
-            targetLightness.current = result;
-            startSmoothing();
-          }
-        }
-      }
-
       ticking = false;
     };
 
@@ -121,7 +51,6 @@ export default function Nav() {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      if (smoothRafId !== null) cancelAnimationFrame(smoothRafId);
     };
   }, []);
 
@@ -214,22 +143,12 @@ export default function Nav() {
   const isHero = navState === "hero";
   const isHidden = navState === "hidden";
 
-  const mix = (a: number, b: number, t: number) => a + (b - a) * t;
-  const mixRgb = (
-    c1: [number, number, number],
-    c2: [number, number, number],
-    t: number,
-  ) =>
-    `rgb(${Math.round(mix(c1[0], c2[0], t))}, ${Math.round(mix(c1[1], c2[1], t))}, ${Math.round(mix(c1[2], c2[2], t))})`;
-
-  const t = lightness;
-
   const navColors = {
-    text: mixRgb([255, 255, 255], [10, 10, 10], t),
-    pillBg: `rgba(${Math.round(mix(255, 10, t))}, ${Math.round(mix(255, 10, t))}, ${Math.round(mix(255, 10, t))}, ${mix(0.12, 0.55, t)})`,
-    pillBorder: `1px solid rgba(${Math.round(mix(255, 0, t))}, ${Math.round(mix(255, 0, t))}, ${Math.round(mix(255, 0, t))}, ${mix(0.2, 0.06, t)})`,
-    pillShadow: `0 4px 32px rgba(0, 0, 0, ${mix(0.08, 0.18, t)}), inset 0 1px 0 rgba(255,255,255,${mix(0.18, 0.03, t)})`,
-    pillContentText: mixRgb([10, 10, 10], [255, 255, 255], t),
+    text: "#FFFFFF",
+    pillBg: "rgba(18, 18, 20, 0.75)",
+    pillBorder: "1px solid rgba(255, 255, 255, 0.1)",
+    pillShadow: "0 4px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+    pillContentText: "#FFFFFF",
   };
 
   const sharedTransition: React.CSSProperties = {

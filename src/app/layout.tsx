@@ -82,10 +82,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} ${anton.variable} h-full antialiased overflow-x-hidden`}
       style={{ scrollBehavior: "auto" }}
     >
-      <body className="min-h-full flex flex-col overflow-x-hidden bg-[#080808]">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col overflow-x-hidden bg-[#080808]"
+      >
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

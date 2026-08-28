@@ -749,10 +749,6 @@ export default function SplashCursor({
 
     let colorTimer = 0;
 
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointerup", onPointerUp);
-
     // ── Simulation step ──
     function splat(
       x: number,
@@ -906,6 +902,8 @@ export default function SplashCursor({
 
     let animationId = 0;
     let lastTime = performance.now();
+    let isRunning = false;
+    let idleFrames = 0;
 
     function frame() {
       const now = performance.now();
@@ -916,21 +914,56 @@ export default function SplashCursor({
 
       if (pointer.moved) {
         pointer.moved = false;
+        idleFrames = 0;
         splatPointer();
+      } else {
+        idleFrames++;
       }
 
       step(dt);
       render();
 
+      // Pause RAF when fluid has settled to save 100% of CPU and GPU
+      if (idleFrames > 75) {
+        isRunning = false;
+        animationId = 0;
+        return;
+      }
+
       animationId = requestAnimationFrame(frame);
     }
 
-    animationId = requestAnimationFrame(frame);
+    function wakeUp() {
+      idleFrames = 0;
+      if (!isRunning) {
+        isRunning = true;
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(frame);
+      }
+    }
+
+    // Wake up when pointer events occur
+    const handlePointerMoveWithWake = (e: PointerEvent) => {
+      onPointerMove(e);
+      wakeUp();
+    };
+
+    const handlePointerDownWithWake = (e: PointerEvent) => {
+      onPointerDown(e);
+      wakeUp();
+    };
+
+    window.addEventListener("pointermove", handlePointerMoveWithWake, { passive: true });
+    window.addEventListener("pointerdown", handlePointerDownWithWake);
+    window.addEventListener("pointerup", onPointerUp);
+
+    // Initial render burst
+    wakeUp();
 
     return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerdown", onPointerDown);
+      if (animationId) cancelAnimationFrame(animationId);
+      window.removeEventListener("pointermove", handlePointerMoveWithWake);
+      window.removeEventListener("pointerdown", handlePointerDownWithWake);
       window.removeEventListener("pointerup", onPointerUp);
     };
   }, [
