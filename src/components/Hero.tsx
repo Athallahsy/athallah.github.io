@@ -76,6 +76,7 @@ export default function Hero() {
           aria-hidden
           fill
           priority
+          quality={85}
           sizes="100vw"
           style={{
             objectFit: "cover",

@@ -627,7 +627,7 @@ export default function Projects() {
 
         {/* Projects cards list (z-20) */}
         <div className="flex flex-col gap-24 lg:flex-row lg:gap-20 lg:items-center relative z-20">
-          {FEATURED_PROJECTS.map((proj, index) => {
+          {FEATURED_PROJECTS.map((proj) => {
             const isPortrait = proj.aspect === "portrait";
             return (
               <div
@@ -742,7 +742,8 @@ export default function Projects() {
                         alt={proj.title}
                         fill
                         sizes="(max-width: 1024px) 100vw, 480px"
-                        priority={index === 0}
+                        priority={false}
+                        quality={85}
                         className="card-image-parallax object-contain"
                       />
                     </div>

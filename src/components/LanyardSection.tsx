@@ -29,6 +29,7 @@ export default function LanyardSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [startEntrance, setStartEntrance] = useState(false);
   const [showSplashCursor, setShowSplashCursor] = useState(false);
+  const [shouldMountLanyard, setShouldMountLanyard] = useState(false);
 
   useEffect(() => {
     let resizeTimer: ReturnType<typeof setTimeout>;
@@ -54,6 +55,19 @@ export default function LanyardSection() {
     );
     if (section) visibilityObserver.observe(section);
 
+    // Lazy load the heavy 3D Three.js + Rapier physics canvas only when the
+    // section is within 350px of the viewport, eliminating it from initial TBT.
+    const lanyardObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldMountLanyard(true);
+          lanyardObserver.disconnect();
+        }
+      },
+      { rootMargin: "350px 0px" },
+    );
+    if (section) lanyardObserver.observe(section);
+
     window.addEventListener("resize", handleResize);
 
     const trigger = ScrollTrigger.create({
@@ -67,6 +81,7 @@ export default function LanyardSection() {
       clearTimeout(resizeTimer);
       window.removeEventListener("resize", handleResize);
       visibilityObserver.disconnect();
+      lanyardObserver.disconnect();
       trigger.kill();
     };
   }, []);
@@ -151,13 +166,20 @@ export default function LanyardSection() {
 
       {/* Lanyard Canvas Container */}
       <div className="lanyard-canvas-wrap">
-        <Suspense fallback={null}>
-          <Lanyard
-            position={[2.5, 1.9, 14.8]}
-            gravity={[0, -40, 0]}
-            startEntrance={startEntrance}
+        {shouldMountLanyard ? (
+          <Suspense fallback={null}>
+            <Lanyard
+              position={[2.5, 1.9, 14.8]}
+              gravity={[0, -40, 0]}
+              startEntrance={startEntrance}
+            />
+          </Suspense>
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center opacity-0"
+            style={{ minHeight: "400px" }}
           />
-        </Suspense>
+        )}
       </div>
 
       <style>{`

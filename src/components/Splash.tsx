@@ -6,20 +6,14 @@ import gsap from "gsap";
 const NAME_WHITE = "Athallah";
 const NAME_ACCENT = "sy";
 
-const NUM_COLUMNS = 20;
+const NUM_COLUMNS = 16;
 const PLANE_SIZE = 200;
 const PLANE_OUTSIDE_OFFSET = 400;
-const PLANE_FLY_DURATION = 2.4;
-const STAIRCASE_VERTICAL_LAG = 8;
+const PLANE_FLY_DURATION = 1.4;
+const STAIRCASE_VERTICAL_LAG = 6;
 
-// Asset berat yang beneran nge-block pengalaman pertama user (foto hero,
-// model 3D lanyard, texture-nya) — splash nunggu ini kelar fetch beneran,
-// bukan nunggu durasi yang ditebak-tebak.
-const PRELOAD_ASSETS = [
-  "/images/hero-bg.jpeg",
-  "/models/card-v3.glb",
-  "/textures/lanyard-v3.png",
-];
+// Hanya preload gambar hero untuk tampilan awal yang instan
+const PRELOAD_ASSETS = ["/images/hero-bg.jpeg"];
 
 const MIN_HOLD_MS = 500;
 
@@ -266,23 +260,14 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
           left: `calc(100% + ${PLANE_OUTSIDE_OFFSET}px)`,
           duration: PLANE_FLY_DURATION,
           ease: "power1.inOut",
-          onUpdate: () => {
-            const plane = planeRef.current;
-            if (!plane) return;
-
-            const rect = plane.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-
-            // Pakai rect.right biar progress ngikutin ujung depan pesawat
-            const rawProgress = Math.min(
-              Math.max((rect.left - 50) / viewportWidth, 0),
-              1,
-            );
-
+          onUpdate: function () {
+            // Menggunakan progress tween GSAP secara langsung tanpa membaca DOM geometry
+            // (menghilangkan Forced Reflow / Layout Recalculation).
+            const rawProgress = this.progress();
             const openColumns =
               rawProgress >= 1
                 ? NUM_COLUMNS + STAIRCASE_VERTICAL_LAG
-                : rawProgress * NUM_COLUMNS;
+                : rawProgress * (NUM_COLUMNS + STAIRCASE_VERTICAL_LAG);
 
             if (bgTopRef.current) {
               bgTopRef.current.style.clipPath = generateStaircasePolygon(

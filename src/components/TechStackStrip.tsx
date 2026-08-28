@@ -43,7 +43,6 @@ export default function TechStackStrip() {
     const MAX_BOOST = 5.5; // max extra px/frame from scroll
     let scrollBoost = 0; // can be negative (scroll up reverses direction)
     let lastDirection = 1; // 1 = kanan, -1 = kiri
-    let isVisible = false;
 
     // --- ScrollTrigger: read scroll velocity + direction ---
     const st = ScrollTrigger.create({
@@ -65,11 +64,6 @@ export default function TechStackStrip() {
 
     // --- RAF loop: only runs when section is visible ---
     const tick = () => {
-      if (!isVisible) {
-        rafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
       // Decay scrollBoost toward 0 each frame (smooth return to base speed)
       scrollBoost *= 0.92;
 
@@ -85,23 +79,37 @@ export default function TechStackStrip() {
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    // IntersectionObserver: pause animation when section is off-screen
-    // to avoid wasting main-thread budget when user is on other sections.
+    const startAnimation = () => {
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    const stopAnimation = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+
+    // IntersectionObserver: start/stop animation when section is in/out of view
     const section = track.closest("section");
     const io = new IntersectionObserver(
       (entries) => {
-        isVisible = entries[0]?.isIntersecting ?? false;
+        if (entries[0]?.isIntersecting) {
+          startAnimation();
+        } else {
+          stopAnimation();
+        }
       },
-      { rootMargin: "200px" }, // start a bit before visible for smooth transition
+      { rootMargin: "200px" },
     );
     if (section) io.observe(section);
-
-    rafRef.current = requestAnimationFrame(tick);
 
     return () => {
       st.kill();
       io.disconnect();
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      stopAnimation();
     };
   }, []);
 
