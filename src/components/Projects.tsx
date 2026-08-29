@@ -173,8 +173,10 @@ export default function Projects() {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
 
+    let isCanvasActive = false;
     const renderTrail = () => {
-      if (!ctx || !canvas) return;
+      if (!ctx || !canvas || !isCanvasActive) return;
+      if (trail.length === 0) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const now = Date.now();
       trail = trail.filter((dot) => now - dot.timestamp < 800);
@@ -189,12 +191,13 @@ export default function Projects() {
       });
     };
 
-    gsap.ticker.add(renderTrail);
-
     mm.add("(min-width: 1024px)", () => {
       const container = containerRef.current;
       const track = trackRef.current;
       if (!container || !track) return;
+
+      isCanvasActive = true;
+      gsap.ticker.add(renderTrail);
 
       if (cloudsRef.current) {
         cloudsRef.current.style.width = `${track.scrollWidth}px`;

@@ -51,12 +51,13 @@ export default function LanyardSection() {
         isInViewRef.current = inView;
         setShowSplashCursor(inView && window.innerWidth >= 768);
       },
-      { rootMargin: "100px" },
+      { rootMargin: "0px" },
     );
     if (section) visibilityObserver.observe(section);
 
-    // Lazy load the heavy 3D Three.js + Rapier physics canvas only when the
-    // section is within 350px of the viewport, eliminating it from initial TBT.
+    // Lazy load the heavy 3D Three.js + Rapier physics canvas ONLY when the
+    // section actually enters the viewport (when user scrolls), completely
+    // eliminating 7,200ms WASM/Shader compilation from initial page load TBT.
     const lanyardObserver = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
@@ -64,7 +65,7 @@ export default function LanyardSection() {
           lanyardObserver.disconnect();
         }
       },
-      { rootMargin: "350px 0px" },
+      { rootMargin: "50px 0px" },
     );
     if (section) lanyardObserver.observe(section);
 
