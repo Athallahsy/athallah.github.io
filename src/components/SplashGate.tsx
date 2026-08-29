@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import Splash from "@/components/Splash";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import TechStackStrip from "@/components/TechStackStrip";
-import LanyardSection from "@/components/LanyardSection";
-import Skills from "@/components/Skills";
-import Projects from "@/components/Projects";
-import FooterContact from "@/components/FooterContact";
+
+const TechStackStrip = dynamic(() => import("@/components/TechStackStrip"));
+const LanyardSection = dynamic(() => import("@/components/LanyardSection"));
+const Skills = dynamic(() => import("@/components/Skills"));
+const Projects = dynamic(() => import("@/components/Projects"));
+const FooterContact = dynamic(() => import("@/components/FooterContact"));
 
 const emptySubscribe = () => () => {};
 

@@ -96,7 +96,7 @@ const ARCHIVE_PROJECTS = [
 // Technical Grid Blueprint Mark
 function CoordinateCross({ className }: { className?: string }) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg className={className} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M8 2V14M2 8H14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
@@ -570,7 +570,8 @@ export default function Projects() {
         >
           <Image
             src="/images/pesawat.svg"
-            alt="airplane"
+            alt=""
+            aria-hidden="true"
             width={120}
             height={120}
             style={{ width: "100%", height: "100%" }}

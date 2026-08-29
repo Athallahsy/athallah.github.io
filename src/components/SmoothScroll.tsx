@@ -10,6 +10,9 @@ export default function SmoothScroll({
   children: React.ReactNode;
 }) {
   useEffect(() => {
+    // Disable smooth scroll on touch/mobile devices for native performance & zero TBT overhead
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    if (isTouch) return;
 
     const lenis = new Lenis({
       duration: 1.2,

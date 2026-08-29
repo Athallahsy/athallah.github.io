@@ -15,7 +15,7 @@ const GREETINGS = [
   "Olá", // Portugis
 ];
 
-const GREETING_INTERVAL_MS = 500;
+const GREETING_INTERVAL_MS = 180;
 const MIN_HOLD_MS = GREETING_INTERVAL_MS * GREETINGS.length;
 
 const PLANE_SIZE = 46;
@@ -76,13 +76,11 @@ const STARS = [
 ];
 
 export default function Splash({ onComplete }: { onComplete: () => void }) {
-  const [progress, setProgress] = useState(0);
   const [greetingIndex, setGreetingIndex] = useState(0);
   const greetingTextRef = useRef<HTMLSpanElement>(null);
-
-  const t = progress / 100;
-  const planePos = pointOnCurve(t);
-  const planeAngle = angleOnCurve(t);
+  const planeRef = useRef<HTMLImageElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  const percentRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -97,6 +95,7 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         duration: 0.15,
         ease: "power2.in",
         onComplete: () => {
+          if (cancelled) return;
           setGreetingIndex((prev) => (prev + 1) % GREETINGS.length);
           gsap.fromTo(
             greetingTextRef.current,
@@ -107,14 +106,34 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
       });
     }, GREETING_INTERVAL_MS);
 
-    // ── Progress berbasis waktu, menggerakkan pesawat di sepanjang kurva ──
-    const startTime = Date.now();
-    const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(100, (elapsed / MIN_HOLD_MS) * 100);
-      if (!cancelled) setProgress(pct);
-      if (pct >= 100) clearInterval(progressInterval);
-    }, 50);
+    // ── Progress animasi via GSAP (menggantikan state update tiap 50ms) ──
+    const progressObj = { value: 0 };
+    gsap.to(progressObj, {
+      value: 100,
+      duration: MIN_HOLD_MS / 1000,
+      ease: "none",
+      onUpdate: () => {
+        const pct = progressObj.value;
+        const t = pct / 100;
+        
+        // Update persentase text
+        if (percentRef.current) {
+          percentRef.current.innerText = Math.floor(pct).toString().padStart(2, "0") + "%";
+        }
+        
+        // Update garis menyala (dashoffset)
+        if (pathRef.current) {
+          pathRef.current.style.strokeDashoffset = (100 - pct).toString();
+        }
+        
+        // Update posisi & rotasi pesawat
+        if (planeRef.current) {
+          const pos = pointOnCurve(t);
+          const angle = angleOnCurve(t);
+          planeRef.current.style.transform = `translate(${pos.x - PLANE_SIZE / 2}px, ${pos.y - PLANE_SIZE / 2}px) rotate(${angle}deg)`;
+        }
+      }
+    });
 
     // ── Setelah waktu minimum lewat, fade out splash-nya ──
     const holdTimeout = setTimeout(() => {
@@ -135,11 +154,15 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
     return () => {
       cancelled = true;
       clearInterval(greetingTimer);
-      clearInterval(progressInterval);
       clearTimeout(holdTimeout);
       document.body.style.overflow = "";
+      gsap.killTweensOf(progressObj);
     };
   }, [onComplete]);
+
+  // Initial values for SSR/first paint
+  const initialPos = pointOnCurve(0);
+  const initialAngle = angleOnCurve(0);
 
   return (
     <div
@@ -148,8 +171,6 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        // Radial gradient: dari abu gelap di tengah ke hitam di pinggir,
-        // biar background gak flat/rata sewarna doang
         background:
           "radial-gradient(circle at 50% 40%, #141414 0%, #080808 70%)",
         display: "flex",
@@ -160,7 +181,6 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         overflow: "hidden",
       }}
     >
-      {/* Definisi animasi kelap-kelip untuk bintang-bintang background */}
       <style>{`
         @keyframes splashTwinkle {
           0%, 100% { opacity: 0.15; }
@@ -168,7 +188,6 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         }
       `}</style>
 
-      {/* Bintang-bintang kecil di background, tiap satu berkelip sendiri-sendiri */}
       {STARS.map((star, i) => (
         <div
           key={i}
@@ -187,7 +206,6 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         />
       ))}
 
-      {/* Kata "halo" yang gonta-ganti bahasa */}
       <span
         ref={greetingTextRef}
         style={{
@@ -202,7 +220,6 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
         {GREETINGS[greetingIndex]}
       </span>
 
-      {/* Jalur melengkung + pesawat yang terbang di atasnya */}
       <div
         style={{
           position: "relative",
@@ -216,31 +233,28 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
           viewBox={`0 0 ${CURVE_WIDTH} ${CURVE_HEIGHT}`}
           style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}
         >
-          {/* Garis kurva penuh, warnanya samar sebagai "rel" */}
           <path
             d={CURVE_PATH}
             fill="none"
             stroke="rgba(255,255,255,0.15)"
             strokeWidth={1.5}
           />
-          {/* Garis kurva yang menyala, hanya sepanjang progress yang sudah dilewati.
-              pathLength="100" bikin panjang path dianggap 100 satuan,
-              jadi dashoffset bisa langsung dikaitkan ke persentase progress. */}
           <path
+            ref={pathRef}
             d={CURVE_PATH}
             fill="none"
             stroke="var(--primary)"
             strokeWidth={2}
             pathLength={100}
             strokeDasharray={100}
-            strokeDashoffset={100 - progress}
+            strokeDashoffset={100}
             style={{ filter: "drop-shadow(0 0 6px var(--primary))" }}
           />
         </svg>
 
-        {/* Pesawat, posisinya dan rotasinya mengikuti kurva */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          ref={planeRef}
           src="/images/pesawat.svg"
           alt=""
           aria-hidden
@@ -250,16 +264,14 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
             left: 0,
             width: `${PLANE_SIZE}px`,
             height: `${PLANE_SIZE}px`,
-            transform: `translate(${planePos.x - PLANE_SIZE / 2}px, ${
-              planePos.y - PLANE_SIZE / 2
-            }px) rotate(${planeAngle}deg)`,
+            transform: `translate(${initialPos.x - PLANE_SIZE / 2}px, ${initialPos.y - PLANE_SIZE / 2}px) rotate(${initialAngle}deg)`,
             filter: "brightness(0) invert(1)",
           }}
         />
       </div>
 
-      {/* Angka persentase */}
       <span
+        ref={percentRef}
         style={{
           fontSize: "10px",
           letterSpacing: "0.1em",
@@ -268,7 +280,7 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
           fontVariantNumeric: "tabular-nums",
         }}
       >
-        {Math.floor(progress).toString().padStart(2, "0")}%
+        00%
       </span>
     </div>
   );
